@@ -37,7 +37,8 @@ def answer_question_2():
 
     lf_iim = pl.scan_parquet(iris_in_meta_path / '*.parquet')
     
-    result = lf_iim.group_by('type').len().sort('len', descending=True).collect()
+    result = lf_iim.group_by('type').len().sort('len', descending=True).with_columns(pl.col('type').str.replace(r"^$", 'no type')).collect()
+
 
     print('{:*^{}}'.format(' Research question n. 2 ', os.get_terminal_size().columns))
     print("Which are the types of publications that are better covered in OpenCitations Meta?")
@@ -63,6 +64,7 @@ def answer_question_3():
     print("")
     
     return result
+
 
 def answer_question_4():
     iii_path = Path('data/index_in_iris/')
