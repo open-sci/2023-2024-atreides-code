@@ -4,7 +4,10 @@ import polars as pl
 
 
 def read_meta(meta_path):
-    metaparquet_files = meta_path / '*.parquet'
+    if not Path(meta_path).exists():
+        raise FileNotFoundError(f"Folder '{str(meta_path)}' does not exist. Please run the 'meta_to_parquet.py' script first")
+
+    metaparquet_files = Path(meta_path) / '*.parquet'
     lf_iim = pl.scan_parquet(metaparquet_files)
 
     return lf_iim

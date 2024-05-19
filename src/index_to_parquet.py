@@ -10,11 +10,11 @@ import dask.dataframe as dd
 from dask.diagnostics import ProgressBar
 ProgressBar().register()
 
-from src.read_meta import get_omids_list
+from read_meta import get_omids_list
 
 
 def process_index_dump(index_path):
-    if os.path.isdir('data/index_in_iris'):
+    if os.path.isdir('data/iris_in_meta'):
         metaparquet_path = Path('data/iris_in_meta')
     else:
         raise FileNotFoundError('Please run meta_to_parquet.py first')
@@ -36,7 +36,7 @@ def process_index_dump(index_path):
 
         ddf = dd.read_csv(csvs, storage_options={'fo': zip_file.filename}, usecols=['id', 'citing', 'cited'])
         ddf = ddf[ddf['cited'].isin(omids_list) | ddf['citing'].isin(omids_list)]
-        ddf.to_parquet('data/index_in_iris/' + zip_file.filename + '.parquet', write_index=False)
+        ddf.to_parquet(index_path + zip_file.filename + '.parquet', write_index=False)
 
 
 
