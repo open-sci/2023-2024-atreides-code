@@ -3,9 +3,9 @@ from pathlib import Path
 import polars as pl
 
 
-def read_iris(iris_path, not_filtered=False):
+def read_iris(not_filtered=False):
 
-    iris_path = Path(iris_path)
+    iris_path = Path('data/iris-data-2024-03-14')
 
     if not iris_path.exists():
         raise FileNotFoundError(f"Folder '{str(iris_path)}' does not exist. Please download the IRIS dump and place it in the 'data/' folder.")

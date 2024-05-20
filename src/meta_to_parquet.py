@@ -1,6 +1,8 @@
 import os
 import tempfile
 from zipfile import ZipFile
+from requests import get
+from urllib.error import HTTPError
 
 import argparse
 from tqdm import tqdm
@@ -11,29 +13,41 @@ from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from get_iris_dois_isbns import get_iris_dois_pmids_isbns
 from read_iris import read_iris
 
+def get_type(doi):
+    HTTP_HEADERS = {"authorization": "8c0f10ec-f033-4e81-a4ec-818a0232c1f8"}
+    API_CALL = "https://w3id.org/oc/meta/api/v1/metadata/{}"
+
+    response = get(API_CALL.format('doi:'+doi), headers=HTTP_HEADERS)
+
+    try:
+        return response.json()[0]['type']
+    except IndexError:
+        return None
+
 
 def search_for_titles():
     output_dir = "data/iris_in_meta"
     os.makedirs(output_dir, exist_ok=True)
 
-    sparql = SPARQLWrapper("https://test.opencitations.net/meta/sparql")
-
     df = read_iris(not_filtered=True)
 
     iris_noid_titles = (
-        df[['IDE_DOI', 'IDE_ISBN', 'IDE_PMID', 'TITLE']]
+        df
+        .select('ITEM_ID', 'IDE_DOI', 'IDE_ISBN', 'IDE_PMID', 'TITLE')
         .filter(
-            pl.col('IDE_DOI').is_null() & pl.col(
-                'IDE_ISBN').is_null() & pl.col('IDE_PMID').is_null()
+            (pl.col('IDE_DOI').is_null() & pl.col('IDE_ISBN').is_null() & pl.col('IDE_PMID').is_null()),
         )
-    )['TITLE'].to_list()
+        .drop('IDE_DOI', 'IDE_ISBN', 'IDE_PMID')
+    )
 
-    iris_noid_titles_clean = [title.replace('"', "'") for title in iris_noid_titles if title is not None and len(title.split()) > 3]
+    sparql = SPARQLWrapper("https://opencitations.net/meta/sparql")
 
     findings = []
 
-    for title in tqdm(iris_noid_titles_clean[140:]):
-        title = title.replace('\r', ' ').replace('\n', '')
+    for iris_id, title in tqdm(iris_noid_titles.iter_rows(), total=len(iris_noid_titles)):
+        title = title.replace('\r', ' ').replace('\n', '').replace('"', "'")
+        if len(title.split()) < 3:
+            continue
         try:
             sparql.setQuery(f"""
                             PREFIX datacite: <http://purl.org/spar/datacite/>
@@ -49,23 +63,26 @@ def search_for_titles():
                                 ?identifier literal:hasLiteralValue ?doi.
                             FILTER (?type != fabio:Expression)
                             }}""")
-
             sparql.setReturnFormat(JSON)
             results = sparql.query().convert()
 
             if results["results"]["bindings"]:
-                print(results["results"]["bindings"])
                 for result in results["results"]["bindings"]:
                     entity = result["entity"]["value"]
                     doi = result["doi"]["value"]
-                    type = result["type"]["value"]
-                    findings.append({'title': title, 'entity': entity.replace("https://w3id.org/oc/meta/", 'omid:'), 'doi': "doi:"+doi, 'type': type})
+                    type = get_type(doi)
+                    if type:
+                        findings.append({'title': title, 'omid': entity.replace("https://w3id.org/oc/meta/", 'omid:'), 'id': "doi:"+doi, 'type': type, 'iris_id': iris_id})
 
-        except QueryBadFormed as e:
-            print(f"Error querying title '{title}': {e}")
+        except (QueryBadFormed, HTTPError) as e:
+            continue
+
+    titles_df = pl.DataFrame(findings)
+
+    titles_df.write_parquet(os.path.join(output_dir, 'titles_noid.parquet'))
 
 
-def process_meta_zip(zip_path, search_for_titles=False):
+def process_meta_zip(zip_path):
     zip_file = ZipFile(zip_path)
     files_list = [zipfile for zipfile in zip_file.namelist() if zipfile.endswith('.csv')]
     output_dir = "data/iris_in_meta"
@@ -104,7 +121,11 @@ def process_meta_zip(zip_path, search_for_titles=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process zip file containing OpenCitations Meta CSV files")
-    parser.add_argument("meta_zip_location", type=str, help="Path to the zip file")
-    parser.add_argument("--search_for_titles", type=bool, default=False, help="Search for the entities without an id in IRIS by their title in Meta. WARNING: this will take ~3 and a half hours to complete.")
+    parser.add_argument("--meta_zip_location", type=str, help="Path to the zip file")
+    parser.add_argument("--search_for_titles", action="store_true", default=False, help="Search for the entities without an id in IRIS by their title in Meta. WARNING: this will take ~4 hours to complete.")
     args = parser.parse_args()
-    process_meta_zip(args.meta_zip_location, args.search_for_titles)
+    if args.search_for_titles:
+        search_for_titles()
+    else:
+        process_meta_zip(args.meta_zip_location)
+
