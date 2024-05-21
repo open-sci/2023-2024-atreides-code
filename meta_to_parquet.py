@@ -10,8 +10,8 @@ import polars as pl
 from SPARQLWrapper import SPARQLWrapper, JSON
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 
-from get_iris_dois_isbns import get_iris_dois_pmids_isbns
-from read_iris import read_iris
+from src.get_iris_dois_isbns import get_iris_dois_pmids_isbns
+from src.read_iris import read_iris
 
 def get_type(doi):
     HTTP_HEADERS = {"authorization": "8c0f10ec-f033-4e81-a4ec-818a0232c1f8"}
@@ -82,12 +82,12 @@ def search_for_titles():
     titles_df.write_parquet(os.path.join(output_dir, 'titles_noid.parquet'))
 
 
-def process_meta_zip(zip_path):
+def process_meta_zip(zip_path, iris_path):
     zip_file = ZipFile(zip_path)
     files_list = [zipfile for zipfile in zip_file.namelist() if zipfile.endswith('.csv')]
     output_dir = "data/iris_in_meta"
 
-    dois_isbns_pmids_lf = get_iris_dois_pmids_isbns().lazy()
+    dois_isbns_pmids_lf = get_iris_dois_pmids_isbns(iris_path).lazy()
 
     for csv_file in tqdm(files_list, desc="Processing Meta CSV files"):
         with zip_file.open(csv_file, 'r') as file:
@@ -121,11 +121,12 @@ def process_meta_zip(zip_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process zip file containing OpenCitations Meta CSV files")
-    parser.add_argument("--meta_zip_location", type=str, help="Path to the zip file")
+    parser.add_argument("--meta_path", type=str, help="Path to the zip file of the OpenCitations Meta dump")
+    parser.add_argument("--iris_path", type=str, help="Path to the folder containing the IRIS CSV files")
     parser.add_argument("--search_for_titles", action="store_true", default=False, help="Search for the entities without an id in IRIS by their title in Meta. WARNING: this will take ~4 hours to complete.")
     args = parser.parse_args()
     if args.search_for_titles:
         search_for_titles()
     else:
-        process_meta_zip(args.meta_zip_location)
+        process_meta_zip(args.meta_path, args.iris_path)
 

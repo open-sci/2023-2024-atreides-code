@@ -1,17 +1,23 @@
 from pathlib import Path
+from zipfile import ZipFile
 
 import polars as pl
 
+def read_iris(iris_path, not_filtered=False):
 
-def read_iris(not_filtered=False):
+    #iris_path = Path('data/iris-data-2024-03-14')
 
-    iris_path = Path('data/iris-data-2024-03-14')
-
+    iris_path = Path(iris_path)
+    
     if not iris_path.exists():
         raise FileNotFoundError(f"Folder '{str(iris_path)}' does not exist. Please download the IRIS dump and place it in the 'data/' folder.")
 
-    df_iris_master = pl.read_csv('data/iris-data-2024-03-14/ODS_L1_IR_ITEM_MASTER_ALL.csv', columns=['ITEM_ID', 'YEAR_PUBLISHED', 'TITLE'] ,dtypes={'ITEM_ID': pl.Int32, 'YEAR_PUBLISHED': pl.Utf8, 'TITLE': pl.Utf8})
-    df_iris_identifier = pl.read_csv('data/iris-data-2024-03-14/ODS_L1_IR_ITEM_IDENTIFIER.csv', columns=['ITEM_ID', 'IDE_DOI', 'IDE_ISBN', 'IDE_PMID'] ,dtypes={'ITEM_ID': pl.Int32, 'IDE_DOI': pl.Utf8, 'IDE_ISBN': pl.Utf8, 'IDE_PMID': pl.Utf8})
+    if str(iris_path).endswith('.zip'):
+        df_iris_master = pl.read_csv(ZipFile(iris_path).open("ODS_L1_IR_ITEM_MASTER_ALL.csv").read(), columns=['ITEM_ID', 'YEAR_PUBLISHED', 'TITLE'] ,dtypes={'ITEM_ID': pl.Int32, 'YEAR_PUBLISHED': pl.Utf8, 'TITLE': pl.Utf8})
+        df_iris_identifier = pl.read_csv(ZipFile(iris_path).open("ODS_L1_IR_ITEM_IDENTIFIER.csv").read(), columns=['ITEM_ID', 'IDE_DOI', 'IDE_ISBN', 'IDE_PMID'] ,dtypes={'ITEM_ID': pl.Int32, 'IDE_DOI': pl.Utf8, 'IDE_ISBN': pl.Utf8, 'IDE_PMID': pl.Utf8})
+    else:
+        df_iris_master = pl.read_csv(iris_path / 'ODS_L1_IR_ITEM_MASTER_ALL.csv', columns=['ITEM_ID', 'YEAR_PUBLISHED', 'TITLE'] ,dtypes={'ITEM_ID': pl.Int32, 'YEAR_PUBLISHED': pl.Utf8, 'TITLE': pl.Utf8})
+        df_iris_identifier = pl.read_csv(iris_path / 'ODS_L1_IR_ITEM_IDENTIFIER.csv', columns=['ITEM_ID', 'IDE_DOI', 'IDE_ISBN', 'IDE_PMID'] ,dtypes={'ITEM_ID': pl.Int32, 'IDE_DOI': pl.Utf8, 'IDE_ISBN': pl.Utf8, 'IDE_PMID': pl.Utf8})
 
     df = df_iris_identifier.join(df_iris_master, on='ITEM_ID', how='inner')
 

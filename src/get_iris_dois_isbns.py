@@ -3,8 +3,8 @@ import polars as pl
 from read_iris import read_iris
 
 
-def get_iris_dois_pmids_isbns() -> pl.DataFrame:
-    df_filtered = read_iris()
+def get_iris_dois_pmids_isbns(iris_path) -> pl.DataFrame:
+    df_filtered = read_iris(iris_path)
 
     #filter and normalize the dois
     dois = df_filtered.select('ITEM_ID', 'IDE_DOI').drop_nulls('IDE_DOI').unique()
