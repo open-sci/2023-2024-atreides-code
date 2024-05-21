@@ -9,12 +9,13 @@ from tqdm import tqdm
 import polars as pl
 from SPARQLWrapper import SPARQLWrapper, JSON
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
+from dotenv import load_dotenv
 
 from src.get_iris_dois_isbns import get_iris_dois_pmids_isbns
 from src.read_iris import read_iris
 
-def get_type(doi):
-    HTTP_HEADERS = {"authorization": "8c0f10ec-f033-4e81-a4ec-818a0232c1f8"}
+def get_type(doi, apikey):
+    HTTP_HEADERS = {"authorization": apikey}
     API_CALL = "https://w3id.org/oc/meta/api/v1/metadata/{}"
 
     response = get(API_CALL.format('doi:'+doi), headers=HTTP_HEADERS)
@@ -25,11 +26,13 @@ def get_type(doi):
         return None
 
 
-def search_for_titles():
+def search_for_titles(iris_path):
     output_dir = "data/iris_in_meta"
     os.makedirs(output_dir, exist_ok=True)
+    load_dotenv()
+    OC_APIKEY = os.getenv('OC_APIKEY')
 
-    df = read_iris(not_filtered=True)
+    df = read_iris(iris_path, not_filtered=True)
 
     iris_noid_titles = (
         df
@@ -70,7 +73,7 @@ def search_for_titles():
                 for result in results["results"]["bindings"]:
                     entity = result["entity"]["value"]
                     doi = result["doi"]["value"]
-                    type = get_type(doi)
+                    type = get_type(doi, OC_APIKEY)
                     if type:
                         findings.append({'title': title, 'omid': entity.replace("https://w3id.org/oc/meta/", 'omid:'), 'id': "doi:"+doi, 'type': type, 'iris_id': iris_id})
 
@@ -121,12 +124,12 @@ def process_meta_zip(zip_path, iris_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process zip file containing OpenCitations Meta CSV files")
-    parser.add_argument("--meta_path", type=str, help="Path to the zip file of the OpenCitations Meta dump")
-    parser.add_argument("--iris_path", type=str, help="Path to the folder containing the IRIS CSV files")
+    parser.add_argument("-meta", "--meta_path", type=str, required=True, help="Path to the zip file of the OpenCitations Meta dump")
+    parser.add_argument("-iris", "--iris_path", type=str, required=True, help="Path to the folder containing the IRIS CSV files")
     parser.add_argument("--search_for_titles", action="store_true", default=False, help="Search for the entities without an id in IRIS by their title in Meta. WARNING: this will take ~4 hours to complete.")
     args = parser.parse_args()
     if args.search_for_titles:
-        search_for_titles()
+        search_for_titles(args.iris_path)
     else:
         process_meta_zip(args.meta_path, args.iris_path)
 

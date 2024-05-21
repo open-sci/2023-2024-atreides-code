@@ -1,6 +1,6 @@
 import polars as pl
 
-from read_iris import read_iris
+from src.read_iris import read_iris
 
 
 def get_iris_dois_pmids_isbns(iris_path) -> pl.DataFrame:
