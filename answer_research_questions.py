@@ -37,7 +37,7 @@ def answer_question_2():
 
 
 def answer_question_3():
-    iii_path = Path('data/index_in_iris/')
+    iii_path = Path('data/iris_in_index/')
 
     if not iii_path.exists():
         return f"Folder '{str(iii_path)}' does not exist. Please run the 'index_to_parquet.py' script first."
@@ -52,7 +52,7 @@ def answer_question_3():
 
 
 def answer_question_4():
-    iii_path = Path('data/index_in_iris/')
+    iii_path = Path('data/iris_in_index/')
     iris_in_meta_path = Path('data/iris_in_meta')
 
     if not iii_path.exists():
@@ -100,7 +100,7 @@ def answer_question_4():
 
 
 def answer_question_5():
-    iii_path = Path('data/index_in_iris/')
+    iii_path = Path('data/iris_in_index/')
     iris_in_meta_path = Path('data/iris_in_meta')
 
     if not iii_path.exists():

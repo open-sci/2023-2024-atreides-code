@@ -28,6 +28,8 @@ def process_index_dump(index_path):
 
     omids_list = get_omids_list()
 
+    output_dir = Path("data/iris_in_index")
+
     for archive in tqdm(file_names):
         zip_file = ZipFile(archive)
 
@@ -35,7 +37,7 @@ def process_index_dump(index_path):
 
         ddf = dd.read_csv(csvs, storage_options={'fo': zip_file.filename}, usecols=['id', 'citing', 'cited'])
         ddf = ddf[ddf['cited'].isin(omids_list) | ddf['citing'].isin(omids_list)]
-        ddf.to_parquet(index_path + zip_file.filename + '.parquet', write_index=False)
+        ddf.to_parquet(output_dir / zip_file.filename.replace('.zip', '.parquet'), write_index=False)
 
 
 
