@@ -152,33 +152,33 @@ def main():
     if args.research_question:
         result = None
         if args.research_question == 1:
-            result = answer_question_1()
             print('{:*^{}}'.format(' Research question n. 1 ', os.get_terminal_size().columns))
             print(textwrap.fill("What is the coverage of the publications available in IRIS (strictly concerning research conducted within the University of Bologna) in OpenCitations Meta?", width=os.get_terminal_size().columns) )
+            result = answer_question_1()
             print(result)
             print("")
         elif args.research_question == 2:
-            result = answer_question_2()
             print('{:*^{}}'.format(' Research question n. 2 ', os.get_terminal_size().columns))
             print(textwrap.fill("Which are the types of publications that are better covered in OpenCitations Meta?", width=os.get_terminal_size().columns) )
+            result = answer_question_2()
             print(result)
             print("")
         elif args.research_question == 3:
-            result = answer_question_3()
             print('{:*^{}}'.format(' Research question n. 3 ', os.get_terminal_size().columns))
             print(textwrap.fill("Research question n. 3: What is the amount of citations (according to OpenCitations Index) included in the IRIS publications that are involved in OpenCitations Meta (as citing entity and as cited entity)?", width=os.get_terminal_size().columns) )
+            result = answer_question_3()
             print(result)
             print("")
         elif args.research_question == 4:
-            result = answer_question_4()
             print('{:*^{}}'.format(' Research question n. 4 ', os.get_terminal_size().columns))
             print(textwrap.fill("Research question n. 4: How many of these citations come from and go to publications that are not included in IRIS?", width=os.get_terminal_size().columns) )
+            result = answer_question_4()
             print(result)
             print("")
         elif args.research_question == 5:
-            result = answer_question_5()
             print('{:*^{}}'.format(' Research question n. 5 ', os.get_terminal_size().columns))
             print(textwrap.fill("Research question n. 5: How many of these citations involve publications in IRIS as both citing and cited entities?", width=os.get_terminal_size().columns) )
+            result = answer_question_5()
             print(result)
             print("")
     else:
