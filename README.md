@@ -1,12 +1,16 @@
 # 2023-2024-atreides-code
 The repository for the team Atreides of the Open Science course a.a. 2023/2024
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11262417.svg)](https://doi.org/10.5281/zenodo.11262417)
+[![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/open-sci/2023-2024-atreides-code/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/open-sci/2023-2024-atreides-code)
+
 ## Research questions:
 
 1) What is the coverage of the publications available in IRIS, that strictly concern research conducted within the University of Bologna, in OpenCitations Meta?
-2) What is the types of publications that are better covered in OpenCitations Meta?
+2) What are the types of publications that are better covered in OpenCitations Meta?
 3) What is the amount of citations (according to OpenCitations Index) the IRIS publications included in OpenCitations Meta are involved in (as citing entity and as cited entity)?
-4) How many of these citations come from and go to publications not included in IRIS, and how many of these citations involves publications in IRIS as both citing and cited entities?
+4) How many of these citations come from and go to publications not included in IRIS?
+5) How many of these citations involve publications in IRIS as both citing and cited entities?
 
 ## Download data
 
@@ -16,28 +20,23 @@ The repository for the team Atreides of the Open Science course a.a. 2023/2024
 
 -OpenCitations Index November 2023 Dump: [https://doi.org/10.6084/m9.figshare.24356626.v2](https://doi.org/10.6084/m9.figshare.24356626.v2)
 
-Save these files in a new folder "data", to store in the same path of this software.
-
 ## Reproduce the experiment
+Clone the repository
 
-Check the dependencies in *requirements.txt*
-
-Reach the folder containing the *answer_research_questions.py* file. 
+Install the dependencies in *requirements.txt*
 
 Use the following command to run the script:
 
 ```python answer_research_questions.py```
 
-If you want to specify a research question you can run ```python answer_research_questions.py``` adding ```-rq1``` for retrieving the results of research question 1, and so on.
+If you want to specify a research question you can run ```python answer_research_questions.py``` and add the ```-rq``` flag followed by the number of the research question you want the answer of.
 
-## Result dataset
+For more detailed guidelines consult the protocol for the software 
 
--IRIS in Meta: [dx.doi.org/10.6084/m9.figshare.25879420](dx.doi.org/10.6084/m9.figshare.25879420)
+## Result datasets
 
--IRIS in Index: [dx.doi.org/10.6084/m9.figshare.25879441](dx.doi.org/10.6084/m9.figshare.25879441)
+-IRIS in Meta: [https://doi.org/10.6084/m9.figshare.25879420.v1](https://doi.org/10.6084/m9.figshare.25879420.v1)
 
-## Identifiers
--swh:1:dir:1d8ed32ba0724089bcb7e9b4d609f60e50c18121
+-IRIS in Index: [https://doi.org/10.6084/m9.figshare.25879441.v1](https://doi.org/10.6084/m9.figshare.25879441.v1)
 
--doi:10.5281/zenodo.11262417
 
