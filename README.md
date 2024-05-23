@@ -1,8 +1,6 @@
 # 2023-2024-atreides-code
 The repository for the team Atreides of the Open Science course a.a. 2023/2024
 
-The software is published at the following link: 
-
 ## Research questions:
 
 1) What is the coverage of the publications available in IRIS, that strictly concern research conducted within the University of Bologna, in OpenCitations Meta?
@@ -12,10 +10,14 @@ The software is published at the following link:
 
 ## Reproduce the experiment
 
-Check the dependencies 
+Check the dependencies.
 
 Reach the folder containing the answer_research_questions.py file. Use the following command to run the script:
 
 python answer_research_questions.py
 
-## Src
+## Result dataset
+
+-IRIS in Meta: dx.doi.org/10.6084/m9.figshare.25879420
+-IRIS in Index: dx.doi.org/10.6084/m9.figshare.25879441
+
