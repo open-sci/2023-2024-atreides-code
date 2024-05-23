@@ -29,9 +29,9 @@ Use the following command to run the script:
 
 ```python answer_research_questions.py```
 
-If you want to specify a research question you can run ```python answer_research_questions.py``` and add the ```-rq``` flag followed by the number of the research question you want the answer of.
+You can get the answer to a specific research question by adding to the previous commang the ```-rq``` flag followed by the number of the research question you want the answer of.
 
-For more detailed guidelines consult the protocol for the software 
+For more detailed guidelines consult the protocol for the software: [https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v3](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v3)
 
 ## Result datasets
 
