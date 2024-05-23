@@ -26,9 +26,9 @@ Reach the folder containing the *answer_research_questions.py* file.
 
 Use the following command to run the script:
 
-'''python answer_research_questions.py'''
+```python answer_research_questions.py```
 
-If you want to specify a research question you can run '''python answer_research_questions.py''' adding '''-rq1''' for retrieving the results of research question 1, and so on.
+If you want to specify a research question you can run ```python answer_research_questions.py``` adding ```-rq1``` for retrieving the results of research question 1, and so on.
 
 ## Result dataset
 
