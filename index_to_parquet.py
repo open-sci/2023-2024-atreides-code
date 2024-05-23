@@ -24,7 +24,7 @@ def process_index_dump(index_path):
             zip_ref.extractall(extraction_dir)
         index_path = extraction_dir
 
-    file_names = [Path(index_path / archive) for archive in os.listdir(index_path)]
+    file_names = [Path(index_path) / Path(archive) for archive in os.listdir(index_path)]
 
     omids_list = get_omids_list()
 
@@ -37,7 +37,7 @@ def process_index_dump(index_path):
 
         ddf = dd.read_csv(csvs, storage_options={'fo': zip_file.filename}, usecols=['id', 'citing', 'cited'])
         ddf = ddf[ddf['cited'].isin(omids_list) | ddf['citing'].isin(omids_list)]
-        ddf.to_parquet(output_dir / zip_file.filename.replace('.zip', '.parquet'), write_index=False)
+        ddf.to_parquet(output_dir / archive.stem, write_index=False)
 
 
 

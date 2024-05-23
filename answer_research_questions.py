@@ -10,8 +10,8 @@ pl.Config.set_tbl_hide_column_names(True)
 pl.Config.set_tbl_hide_column_data_types(True)
 
 
-def answer_question_1():
-    iris_in_meta_path = Path('data/iris_in_meta')
+def answer_question_1(iim_path='data/iris_in_meta'):
+    iris_in_meta_path = Path(iim_path)
 
     if not iris_in_meta_path.exists():
         return f"Folder '{str(iris_in_meta_path)}' does not exist. Please run the 'meta_to_parquet.py' script first."
@@ -23,8 +23,8 @@ def answer_question_1():
     return result
 
 
-def answer_question_2():
-    iris_in_meta_path = Path('data/iris_in_meta')
+def answer_question_2(iim_path='data/iris_in_meta'):
+    iris_in_meta_path = Path(iim_path)
 
     if not iris_in_meta_path.exists():
         return f"Folder '{str(iris_in_meta_path)}' does not exist. Please run the 'meta_to_parquet.py' script first."
@@ -36,8 +36,8 @@ def answer_question_2():
     return result
 
 
-def answer_question_3():
-    iii_path = Path('data/iris_in_index/')
+def answer_question_3(iii_path='data/iris_in_index'):
+    iii_path = Path(iii_path)
 
     if not iii_path.exists():
         return f"Folder '{str(iii_path)}' does not exist. Please run the 'index_to_parquet.py' script first."
@@ -51,9 +51,9 @@ def answer_question_3():
     return result
 
 
-def answer_question_4():
-    iii_path = Path('data/iris_in_index/')
-    iris_in_meta_path = Path('data/iris_in_meta')
+def answer_question_4(iim_path='data/iris_in_meta', iii_path='data/iris_in_index'):
+    iii_path = Path(iii_path)
+    iris_in_meta_path = Path(iim_path)
 
     if not iii_path.exists():
         return f"Folder '{str(iii_path)}' does not exist. Please run the 'index_to_parquet.py' script first."
@@ -99,9 +99,9 @@ def answer_question_4():
     return result
 
 
-def answer_question_5():
-    iii_path = Path('data/iris_in_index/')
-    iris_in_meta_path = Path('data/iris_in_meta')
+def answer_question_5(iim_path='data/iris_in_meta', iii_path='data/iris_in_index'):
+    iii_path = Path(iii_path)
+    iris_in_meta_path = Path(iim_path)
 
     if not iii_path.exists():
         return f"Folder '{str(iii_path)}' does not exist. Please run the 'index_to_parquet.py' script first."
