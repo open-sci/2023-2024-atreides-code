@@ -36,3 +36,8 @@ If you want to specify a research question you can run ```python answer_research
 
 -IRIS in Index: [dx.doi.org/10.6084/m9.figshare.25879441](dx.doi.org/10.6084/m9.figshare.25879441)
 
+## Identifiers
+-swh:1:dir:1d8ed32ba0724089bcb7e9b4d609f60e50c18121
+
+-doi:10.5281/zenodo.11262417
+
