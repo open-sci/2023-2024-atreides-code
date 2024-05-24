@@ -25,13 +25,19 @@ Clone the repository
 
 Install the dependencies in *requirements.txt*
 
+Create the necessary datasets (at least 'IRIS in Meta' and 'IRIS in Index') by running the following command:
+
+```python create_datasets.py -meta <path_to_meta_zip> -iris <path_to_iris_zip> -index <path_to_index_zip> --iris_in_meta --iris_in_index```
+
+Alternatively, download them from the links at the bottom of this page and place them in the 'data/' directory of the repository folder.
+
 Use the following command to run the script:
 
 ```python answer_research_questions.py```
 
 You can get the answer to a specific research question by adding to the previous commang the ```-rq``` flag followed by the number of the research question you want the answer of.
 
-For more detailed guidelines consult the protocol for the software: [https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v3](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v3)
+For more detailed guidelines consult the protocol for the software: [https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v4](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v4)
 
 ## Result datasets
 
