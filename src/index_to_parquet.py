@@ -15,7 +15,7 @@ from src.read_iris_in_meta import get_omids_list
 
 def process_index_dump(index_path):
     if not os.path.isdir('data/iris_in_meta'):
-        raise FileNotFoundError('Please run meta_to_parquet.py first')
+        raise FileNotFoundError(f"Folder 'data/iris_in_meta' does not exist. Please create the 'iris_in_meta' dataset first")
 
     # unzip the internal archives
     if index_path.endswith('.zip'):
