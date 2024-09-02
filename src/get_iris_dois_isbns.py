@@ -7,7 +7,7 @@ def get_iris_dois_pmids_isbns(iris_path) -> pl.DataFrame:
     df_filtered = read_iris(iris_path)
 
     #filter and normalize the dois
-    dois = df_filtered.select('ITEM_ID', 'IDE_DOI').drop_nulls('IDE_DOI').unique()
+    dois = df_filtered.select('ITEM_ID', 'IDE_DOI', 'OWNING_COLLECTION').drop_nulls('IDE_DOI')
 
     filtered_dois = (
         dois
@@ -18,7 +18,7 @@ def get_iris_dois_pmids_isbns(iris_path) -> pl.DataFrame:
     )
 
     #filter and normalize the pmids
-    pmids = df_filtered.select('ITEM_ID', 'IDE_PMID').drop_nulls('IDE_PMID').unique()
+    pmids = df_filtered.select('ITEM_ID', 'IDE_PMID', 'OWNING_COLLECTION').drop_nulls('IDE_PMID').unique()
 
     filtered_pmids = (
         pmids
@@ -31,7 +31,7 @@ def get_iris_dois_pmids_isbns(iris_path) -> pl.DataFrame:
     )
 
     #filter and normalize the isbns
-    isbns = df_filtered.select('ITEM_ID', 'IDE_ISBN').drop_nulls('IDE_ISBN').unique()
+    isbns = df_filtered.select('ITEM_ID', 'IDE_ISBN', 'OWNING_COLLECTION').drop_nulls('IDE_ISBN')
 
     filtered_isbns = (
         isbns
@@ -43,6 +43,43 @@ def get_iris_dois_pmids_isbns(iris_path) -> pl.DataFrame:
         .rename({'ITEM_ID': 'iris_id'})
     )
 
-    dois_isbns_pmids_df = pl.concat([filtered_dois, filtered_isbns, filtered_pmids])
 
-    return dois_isbns_pmids_df
+    dois_pmids_isbns_list = pl.concat([filtered_dois, filtered_pmids, filtered_isbns]).rename({'OWNING_COLLECTION': 'iris_type'})
+
+
+    dois_pmids_isbns_filtered = dois_pmids_isbns_list.unique('iris_id', keep='first', maintain_order=True)
+    dpi_dupes_id = dois_pmids_isbns_filtered.filter(pl.col("id").is_duplicated()).sort("id").with_columns(pl.col('iris_type'))#.replace(type_dict))
+
+    doi_priority = {35: 1, 50: 2, 41: 3, 57: 4}
+    isbn_priority = {49: 1, 35: 2}
+
+    def apply_heuristic(group, priority):
+        sorted_group = group.sort(pl.col("iris_type").replace(priority, default=float('inf')))
+        return sorted_group.head(1)
+
+    def handle_duplicates(df, prefix, priority=None, exclude_type=None):
+        filtered_df = df.filter(pl.col('id').str.starts_with(prefix))
+        
+        if exclude_type is not None:
+            keep_df = filtered_df.filter(pl.col('iris_type') != exclude_type)
+        
+        if priority:
+            keep_df = filtered_df.group_by("id").map_groups(
+                lambda group: apply_heuristic(group, priority)
+            )
+        else:
+            keep_df = filtered_df.unique('id', keep='first', maintain_order=True)
+
+        drop_df = filtered_df.join(keep_df, on='iris_id', how='anti').select('iris_id')
+        
+        return drop_df
+
+
+    drop_doi = handle_duplicates(dpi_dupes_id, 'doi:', priority=doi_priority)
+    drop_pmid = handle_duplicates(dpi_dupes_id, 'pmid:', exclude_type=40)
+    drop_isbn = handle_duplicates(dpi_dupes_id, 'isbn:', priority=isbn_priority)
+
+    all_drops = pl.concat([drop_doi, drop_pmid, drop_isbn])
+    final_filtered_df = dois_pmids_isbns_filtered.join(all_drops, on='iris_id', how='anti')
+
+    return final_filtered_df

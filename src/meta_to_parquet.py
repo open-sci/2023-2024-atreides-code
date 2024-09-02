@@ -14,7 +14,7 @@ from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from dotenv import load_dotenv
 
 from src.get_iris_dois_isbns import get_iris_dois_pmids_isbns
-from src.read_iris import read_iris
+from src.read_iris import read_iris, get_iris_type_dict
 
 def get_type(doi, apikey):
     HTTP_HEADERS = {"authorization": apikey}
@@ -87,13 +87,21 @@ def search_for_titles(iris_path):
     titles_df.write_parquet(os.path.join(output_dir, 'titles_noid.parquet'))
 
 
-
 def process_meta_zip(zip_path, iris_path):
     zip_file = ZipFile(zip_path)
-    files_list = [zipfile for zipfile in zip_file.namelist() if zipfile.endswith('.csv')]
+    files_list = [zipfile for zipfile in zip_file.namelist()
+                  if zipfile.endswith('.csv')]
+
     output_iim = Path("data/iris_in_meta")
+    output_iim.mkdir(parents=True, exist_ok=True)
 
     dois_isbns_pmids_lf = get_iris_dois_pmids_isbns(iris_path).lazy()
+
+    preference = pl.LazyFrame({
+        "type": ["journal article", "book chapter", "book chapter"],
+        "iris_type": [35, 41, 42],
+        "preference": [0, 1, 2]
+    })
 
     for csv_file in tqdm(files_list, desc="Processing Meta CSV files"):
         with zip_file.open(csv_file, 'r') as file:
@@ -103,31 +111,61 @@ def process_meta_zip(zip_path, iris_path):
                 tf.seek(0)
                 os.makedirs(output_iim, exist_ok=True)
                 df = (
-                pl.scan_csv(tf.name)
-                .select(['id', 'title', 'type'])
-                .with_columns(
-                    (pl.col('id').str.extract(r"(omid:[^\s]+)")).alias('omid'),
-                    (pl.col('id').str.extract(r"((?:doi):[^\s\"]+)")).alias('doi'),
-                    (pl.col('id').str.extract(r"((?:pmid):[^\s\"]+)")).alias('pmid'),
-                    (pl.col('id').str.extract(r"((?:isbn):[^\s\"]+)")).alias('isbn'),
+                    pl.scan_csv(tf.name)
+                    .select(['id', 'title', 'type'])
+                    .with_columns(
+                        (pl.col('id').str.extract(
+                            r"(omid:[^\s]+)")).alias('omid'),
+                        (pl.col('id').str.extract(
+                            r"((?:doi):[^\s\"]+)")).alias('doi'),
+                        (pl.col('id').str.extract(
+                            r"((?:pmid):[^\s\"]+)")).alias('pmid'),
+                        (pl.col('id').str.extract(
+                            r"((?:isbn):[^\s\"]+)")).alias('isbn'),
+                    )
+                    .with_columns(
+                        pl.coalesce([pl.col('doi'), pl.col('isbn'),
+                                     pl.col('pmid')]).alias('id')
+                    )
+                    .drop(['doi', 'pmid', 'isbn'])
+                    .drop_nulls('id')
+                    .join(dois_isbns_pmids_lf, on='id', how='inner')
+                    .collect(streaming=True)
                 )
-                .with_columns(
-                    pl.coalesce([pl.col('doi'), pl.col('isbn'), pl.col('pmid')]).alias('id')
-                )
-                .drop(['doi', 'pmid', 'isbn'])
-                .drop_nulls('id')
-                .join(dois_isbns_pmids_lf, on='id', how='inner')
-                .collect(streaming=True)
-            )
 
             if not df.is_empty():
-                df.write_parquet(os.path.join(output_iim, os.path.basename(csv_file).replace('.csv', '.parquet')))
+                df.write_parquet(os.path.join(output_iim, os.path.basename(
+                    csv_file).replace('.csv', '.parquet')))
+
+    (
+        pl.scan_parquet(output_iim / "*.parquet")
+        .join(preference, on=["type", "iris_type"], how="left")
+        .sort("preference", descending=True, nulls_last=True)
+        .group_by("id")
+        .first()
+        .drop("preference")
+        .with_columns(
+            pl.col('iris_type').replace(get_iris_type_dict(iris_path))
+        )
+        .rename({"type": "meta_type"})
+    ).sink_parquet(output_iim / "iris_in_meta.parquet")
+
+    for file in os.listdir(output_iim):
+        if file != 'iris_in_meta.parquet':
+            os.remove(os.path.join(output_iim, file))
+
+    print(f"Iris In Meta saved to '{output_iim}/iris_in_meta.parquet'")
+
 
 
 def create_iris_not_in_meta(iris_path):
     iim_path = Path('data/iris_in_meta')
     if not iim_path.exists():
-        raise FileNotFoundError(f"Folder '{str(iim_path)}' does not exist. Please create the 'iris_in_meta' dataset first")
+        raise FileNotFoundError("Dataset 'Iris in Meta' not found in the 'data/' folder. "
+                                "Please create the 'iris_in_meta' dataset first.")
+
+    output_inim = Path('data/iris_not_in_meta')
+    output_inim.mkdir(parents=True, exist_ok=True)
     
     dois_isbns_pmids_lf = get_iris_dois_pmids_isbns(iris_path).lazy()
 
@@ -139,19 +177,39 @@ def create_iris_not_in_meta(iris_path):
         .collect()
     ) 
 
-    inim.write_parquet('data/iris_not_in_meta.parquet')
+    inim.write_parquet(output_inim / 'iris_not_in_meta.parquet')
+
+    print(f"Iris Not In Meta saved to '{output_inim}/iris_not_in_meta/iris_not_in_meta.parquet'")
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process zip file containing OpenCitations Meta CSV files")
-    parser.add_argument("-meta", "--meta_path", type=str, required=True, help="Path to the zip file of the OpenCitations Meta dump")
-    parser.add_argument("-iris", "--iris_path", type=str, required=True, help="Path to the folder containing the IRIS CSV files")
-    parser.add_argument("--search_for_titles", action="store_true", default=False, help="Search for the entities without an id in IRIS by their title in Meta. WARNING: this will take ~4 hours to complete.")
-    parser.add_argument("--iris_not_in_meta", action="store_true", default=False, help="Create the Iris Not In Meta dataset containing all the entities with external IDs IRIS that are not in Meta.")
-    #parser.add_argument("--iris_noid", action="store_true", default=False, help="Create the Iris No ID dataset containing all the entities with no external IDs in IRIS.")
-    args = parser.parse_args()
-    if args.search_for_titles:
-        search_for_titles(args.iris_path)
-    else:
-        process_meta_zip(args.meta_path, args.iris_path, args.iris_not_in_meta)
+def create_iris_noid(iris_path):
+    iim_path = Path('data/iris_in_meta')
+
+    if not iim_path.exists():
+        raise FileNotFoundError("Dataset 'Iris in Meta' not found in the 'data/' folder. "
+                                "Please create the 'iris_in_meta' dataset first.")
+
+    
+    output_inoid = Path('data/iris_no_id')
+    output_inoid.mkdir(parents=True, exist_ok=True)
+    
+    iris_noid = read_iris(iris_path, no_id=True)
+
+    iris_noid.write_parquet(output_inoid / 'iris_no_id.parquet')
+
+    print(f"Iris No ID saved to '{output_inoid}/iris_not_in_meta.parquet'")
+
+
+#if __name__ == "__main__":
+    #parser = argparse.ArgumentParser(description="Process zip file containing OpenCitations Meta CSV files")
+    #parser.add_argument("-meta", "--meta_path", type=str, required=True, help="Path to the zip file of the OpenCitations Meta dump")
+    #parser.add_argument("-iris", "--iris_path", type=str, required=True, help="Path to the folder containing the IRIS CSV files")
+    #parser.add_argument("--search_for_titles", action="store_true", default=False, help="Search for the entities without an id in IRIS by their title in Meta. WARNING: this will take ~4 hours to complete.")
+    #parser.add_argument("--iris_not_in_meta", action="store_true", default=False, help="Create the Iris Not In Meta dataset containing all the entities with external IDs IRIS that are not in Meta.")
+    ##parser.add_argument("--iris_noid", action="store_true", default=False, help="Create the Iris No ID dataset containing all the entities with no external IDs in IRIS.")
+    #args = parser.parse_args()
+    #if args.search_for_titles:
+        #search_for_titles(args.iris_path)
+    #else:
+        #process_meta_zip(args.meta_path, args.iris_path, args.iris_not_in_meta)
 

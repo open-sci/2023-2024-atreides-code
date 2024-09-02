@@ -1,10 +1,15 @@
 import os
 from zipfile import ZipFile
+import shutil
 
 import argparse
 from pathlib import Path
 
 from tqdm import tqdm
+
+import polars as pl
+
+import glob
 
 import dask.dataframe as dd
 from dask.diagnostics import ProgressBar
@@ -38,6 +43,16 @@ def process_index_dump(index_path):
         ddf = dd.read_csv(csvs, storage_options={'fo': zip_file.filename}, usecols=['id', 'citing', 'cited'])
         ddf = ddf[ddf['cited'].isin(omids_list) | ddf['citing'].isin(omids_list)]
         ddf.to_parquet(output_dir / archive.stem, write_index=False)
+    
+    iii_glob = glob.glob(str(output_dir / '*' / '*.parquet'))
+    iii = pl.scan_parquet(iii_glob)
+    iii.sink_parquet(output_dir / "iris_in_index.parquet")
+
+    for item in os.listdir(output_dir):
+        item_path = os.path.join(output_dir, item)
+        
+        if os.path.isdir(item_path):
+            shutil.rmtree(item_path)
 
 
 

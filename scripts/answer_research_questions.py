@@ -42,9 +42,7 @@ def answer_question_3(iii_path='data/iris_in_index'):
     if not iii_path.exists():
         return f"Folder '{str(iii_path)}' does not exist. Please run the 'index_to_parquet.py' script first."
 
-    iii_glob = glob.glob(str(iii_path / '*' / '*.parquet'))
-
-    lf_iii = pl.scan_parquet(iii_glob)
+    lf_iii = pl.scan_parquet(iii_path / 'iris_in_index.parquet')
     
     result = lf_iii.select(pl.len()).collect()
 
@@ -53,17 +51,16 @@ def answer_question_3(iii_path='data/iris_in_index'):
 
 def answer_question_4(iim_path='data/iris_in_meta', iii_path='data/iris_in_index'):
     iii_path = Path(iii_path)
-    iris_in_meta_path = Path(iim_path)
+    iim_path = Path(iim_path)
 
     if not iii_path.exists():
         return f"Folder '{str(iii_path)}' does not exist. Please run the 'index_to_parquet.py' script first."
-    if not iris_in_meta_path.exists():
-        return f"Folder '{str(iris_in_meta_path)}' does not exist. Please run the 'meta_to_parquet.py' script first."
+    if not iim_path.exists():
+        return f"Folder '{str(iim_path)}' does not exist. Please run the 'meta_to_parquet.py' script first."
 
-    iii_glob = glob.glob(str(iii_path / '*' / '*.parquet'))
-    lf_iii = pl.scan_parquet(iii_glob)
+    lf_iii = pl.scan_parquet(iii_path / 'iris_in_index.parquet')
 
-    lf_iim = pl.scan_parquet(iris_in_meta_path / '*.parquet')
+    lf_iim = pl.scan_parquet(iim_path / 'iris_in_meta.parquet')
 
     oc_omids_list = (
         lf_iim
@@ -91,8 +88,6 @@ def answer_question_4(iim_path='data/iris_in_meta', iii_path='data/iris_in_index
         .collect()
     ).item()
 
-    lf_iii = pl.scan_parquet(iii_glob)
-    
     pl.Config.set_tbl_hide_column_names(False)
     result = pl.DataFrame({'citing': [rq4a], 'cited': [rq4b]})
     
@@ -101,17 +96,16 @@ def answer_question_4(iim_path='data/iris_in_meta', iii_path='data/iris_in_index
 
 def answer_question_5(iim_path='data/iris_in_meta', iii_path='data/iris_in_index'):
     iii_path = Path(iii_path)
-    iris_in_meta_path = Path(iim_path)
+    iim_path = Path(iim_path)
 
     if not iii_path.exists():
         return f"Folder '{str(iii_path)}' does not exist. Please run the 'index_to_parquet.py' script first."
-    if not iris_in_meta_path.exists():
-        return f"Folder '{str(iris_in_meta_path)}' does not exist. Please run the 'meta_to_parquet.py' script first."
+    if not iim_path.exists():
+        return f"Folder '{str(iim_path)}' does not exist. Please run the 'meta_to_parquet.py' script first."
 
-    iii_glob = glob.glob(str(iii_path / '*' / '*.parquet'))
-    lf_iii = pl.scan_parquet(iii_glob)
+    lf_iii = pl.scan_parquet(iii_path / 'iris_in_index.parquet')
 
-    lf_iim = pl.scan_parquet(iris_in_meta_path / '*.parquet')
+    lf_iim = pl.scan_parquet(iim_path / 'iris_in_meta.parquet')
 
     oc_omids_list = (
         lf_iim

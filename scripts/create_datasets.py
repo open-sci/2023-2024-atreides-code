@@ -1,9 +1,9 @@
 import argparse
+import sys
 
 
-from src.meta_to_parquet import process_meta_zip, search_for_titles, create_iris_not_in_meta
+from src.meta_to_parquet import process_meta_zip, search_for_titles, create_iris_not_in_meta, create_iris_noid
 from src.index_to_parquet import process_index_dump
-from src.read_iris import read_iris
 
 def main(args):
 
@@ -14,7 +14,7 @@ def main(args):
         create_iris_not_in_meta(args.iris_path)
 
     if args.iris_no_id:
-        read_iris(args.iris_path, no_id=True)
+        create_iris_noid(args.iris_path)
 
     if args.search_for_titles:
         search_for_titles(args.iris_path)
