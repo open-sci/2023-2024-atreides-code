@@ -1,9 +1,8 @@
 from setuptools import setup, find_packages
-import sys
 
 
 setup(
-    name='AtreidesOS',
+    name='2023-2024-atreides-code',
     version='0.1',
     packages=find_packages(),
     install_requires=[

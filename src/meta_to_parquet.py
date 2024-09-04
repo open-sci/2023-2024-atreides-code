@@ -4,7 +4,6 @@ from zipfile import ZipFile
 from requests import get
 from urllib.error import HTTPError
 
-import argparse
 from pathlib import Path
 from tqdm import tqdm
 
