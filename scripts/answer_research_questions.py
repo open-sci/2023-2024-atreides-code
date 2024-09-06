@@ -1,6 +1,5 @@
 import argparse
 from pathlib import Path
-import glob
 import os
 
 import textwrap
@@ -31,7 +30,7 @@ def answer_question_2(iim_path='data/iris_in_meta'):
 
     lf_iim = pl.scan_parquet(iris_in_meta_path / '*.parquet')
     
-    result = lf_iim.group_by('type').len().sort('len', descending=True).with_columns(pl.col('type').str.replace(r"^$", 'no type')).collect()
+    result = lf_iim.group_by('iris_type').len().sort('len', descending=True).collect(streaming=True)
 
     return result
 
