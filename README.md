@@ -52,6 +52,7 @@ python3 scripts/answer_research_questions.py [-rq <research_question_number>]
 You can get the answer to a specific research question by adding to the previous command the ```-rq``` flag followed by the number of the research question you want the answer of. By omitting this flag, you will get the answers to all the research questions.
 
 For more detailed guidelines consult the protocol for the software:
+
 [![protocols.io](https://a11ybadges.com/badge?logo=protocolsdotio)](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v4)
 
 

@@ -43,7 +43,7 @@ def answer_question_3(iii_path='data/iris_in_index'):
 
     lf_iii = pl.scan_parquet(iii_path / 'iris_in_index.parquet')
     
-    result = lf_iii.select(pl.len()).collect()
+    result = lf_iii.select(pl.len()).collect(streaming=True)
 
     return result
 
@@ -74,7 +74,7 @@ def answer_question_4(iim_path='data/iris_in_meta', iii_path='data/iris_in_index
             ~pl.col('citing').is_in(oc_omids_list)
         )
         .select(pl.len())
-        .collect()
+        .collect(streaming=True)
     ).item()
 
     rq4b = (
@@ -84,7 +84,7 @@ def answer_question_4(iim_path='data/iris_in_meta', iii_path='data/iris_in_index
             ~pl.col('cited').is_in(oc_omids_list)
         )
         .select(pl.len())
-        .collect()
+        .collect(streaming=True)
     ).item()
 
     pl.Config.set_tbl_hide_column_names(False)
@@ -122,7 +122,7 @@ def answer_question_5(iim_path='data/iris_in_meta', iii_path='data/iris_in_index
     )
 
     pl.Config.set_tbl_hide_column_names(True)
-    result = rq5.select(pl.len()).collect()
+    result = rq5.select(pl.len()).collect(streaming=True)
 
     return result
 
