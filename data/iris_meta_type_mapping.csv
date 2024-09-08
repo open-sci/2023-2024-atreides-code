@@ -1,0 +1,29 @@
+iris_type,meta_type
+7.05 Banche dati,dataset
+7.15 Test psicologici,dataset
+1.04 Replica / breve intervento (e simili),other
+2.04 Breve introduzione,other
+2.02 Prefazione,other
+2.03 Postfazione,other
+4.02 Riassunto (Abstract),other
+4.03 Poster,other
+1.02 Nota a sentenza,other
+2.06 Commento giuridico,other
+3.04 Pubblicazione di fonti inedite,other
+2.05 Voce in dizionario o enciclopedia,reference entry
+1.05 Scheda bibliografica,reference entry
+4.01 Contributo in Atti di convegno,proceedings article
+7.13 Rapporto tecnico,report
+2.01 Capitolo / saggio in libro,book chapter
+2.08 Recensione in volume,book chapter
+5.02 Contributo in volume (Traduzione),book chapter
+3.01 Monografia / trattato scientifico in forma di libro,book
+5.01 Libro (Traduzione),book
+3.02 Curatela,book
+3.03 Edizione critica,book
+1.01 Articolo in rivista,journal article
+5.03 Contributo in rivista (Traduzione),journal article
+1.06 Abstract in rivista,journal article
+1.03 Recensione in rivista,journal article
+3.07 Bibliografia,reference book
+,""
