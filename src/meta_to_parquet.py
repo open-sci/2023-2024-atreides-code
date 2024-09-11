@@ -178,7 +178,7 @@ def create_iris_not_in_meta(iris_path):
 
     inim.write_parquet(output_inim / 'iris_not_in_meta.parquet')
 
-    print(f"Iris Not In Meta saved to '{output_inim}/iris_not_in_meta/iris_not_in_meta.parquet'")
+    print(f"Iris Not In Meta saved to '{output_inim}/iris_not_in_meta.parquet'")
 
 
 def create_iris_noid(iris_path):
