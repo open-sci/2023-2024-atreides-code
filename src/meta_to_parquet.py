@@ -182,13 +182,6 @@ def create_iris_not_in_meta(iris_path):
 
 
 def create_iris_noid(iris_path):
-    iim_path = Path('data/iris_in_meta')
-
-    if not iim_path.exists():
-        raise FileNotFoundError("Dataset 'Iris in Meta' not found in the 'data/' folder. "
-                                "Please create the 'iris_in_meta' dataset first.")
-
-    
     output_inoid = Path('data/iris_no_id')
     output_inoid.mkdir(parents=True, exist_ok=True)
     

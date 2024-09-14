@@ -23,16 +23,19 @@ def read_iris(iris_path, not_filtered=False, no_id=False):
     
     if no_id:
         if str(iris_path).endswith('.zip'):
+            df_iris_date_author = pl.read_csv(ZipFile(iris_path).open("ODS_L1_IR_ITEM_MASTER_ALL.csv").read(), columns=['ITEM_ID', 'DATE_ISSUED_YEAR', 'TITLE'])
             df_iris_description = pl.read_csv(ZipFile(iris_path).open('ODS_L1_IR_ITEM_DESCRIPTION.csv').read(), columns=['ITEM_ID', 'DES_ALLPEOPLE', 'DES_NUMBEROFAUTHORS'])
             df_iris_publisher = pl.read_csv(ZipFile(iris_path).open('ODS_L1_IR_ITEM_PUBLISHER.csv').read(), columns=['ITEM_ID', 'PUB_NAME', 'PUB_PLACE', 'PUB_COUNTRY'])
             df_iris_language = pl.read_csv(ZipFile(iris_path).open('ODS_L1_IR_ITEM_LANGUAGE.csv').read(), columns=['ITEM_ID', 'LAN_ISO'])
         else:
             df_iris_description = pl.read_csv(iris_path / 'ODS_L1_IR_ITEM_DESCRIPTION.csv', columns=['ITEM_ID', 'DES_ALLPEOPLE', 'DES_NUMBEROFAUTHORS'])
+            df_iris_date_author = pl.read_csv(ZipFile(iris_path).open("ODS_L1_IR_ITEM_MASTER_ALL.csv").read(), columns=['ITEM_ID', 'OWNING_COLLECTION', 'OWNING_COLLECTION_DES', 'DATE_ISSUED_YEAR', 'TITLE'])
             df_iris_publisher = pl.read_csv(iris_path / 'ODS_L1_IR_ITEM_PUBLISHER.csv', columns=['ITEM_ID', 'PUB_NAME', 'PUB_PLACE', 'PUB_COUNTRY'])
             df_iris_language = pl.read_csv(iris_path / 'ODS_L1_IR_ITEM_LANGUAGE.csv', columns=['ITEM_ID', 'LAN_ISO'])
             
         noid_df = df.filter(pl.col('IDE_DOI').is_null() & pl.col('IDE_ISBN').is_null() & pl.col('IDE_PMID').is_null())
         noid_df = noid_df.join(df_iris_description, on='ITEM_ID', how='left')
+        noid_df = noid_df.join(df_iris_date_author, on='ITEM_ID', how='left')
         noid_df = noid_df.join(df_iris_publisher, on='ITEM_ID', how='left')
         noid_df = noid_df.join(df_iris_language, on='ITEM_ID', how='left')
 
