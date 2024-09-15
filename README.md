@@ -1,7 +1,7 @@
 # 2023-2024-atreides-code
 The repository for the team Atreides of the Open Science course a.a. 2023/2024
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11262417.svg)](https://doi.org/10.5281/zenodo.11262417)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11262417.svg)](https://doi.org/10.5281/zenodo.13764657)
 [![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/open-sci/2023-2024-atreides-code/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/open-sci/2023-2024-atreides-code)
 
 ## Usage
@@ -53,7 +53,7 @@ You can get the answer to a specific research question by adding to the previous
 
 For more detailed guidelines consult the protocol for the software:
 
-[![protocols.io](https://a11ybadges.com/badge?logo=protocolsdotio)](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v4)
+[![protocols.io](https://a11ybadges.com/badge?logo=protocolsdotio)](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v5)
 
 
 ## Research questions:
@@ -76,10 +76,10 @@ For more detailed guidelines consult the protocol for the software:
 
 ## Result datasets
 
-- IRIS in Meta: [https://doi.org/10.6084/m9.figshare.25879420.v1](https://doi.org/10.6084/m9.figshare.25879420.v1)
+- IRIS in Meta: [https://doi.org/10.6084/m9.figshare.25879420.v2](https://doi.org/10.6084/m9.figshare.25879420.v2)
 
-- IRIS in Index: [https://doi.org/10.6084/m9.figshare.25879441.v1](https://doi.org/10.6084/m9.figshare.25879441.v1)
+- IRIS in Index: [https://doi.org/10.6084/m9.figshare.25879441.v2](https://doi.org/10.6084/m9.figshare.25879441.v2)
 
-- IRIS Not in Meta: [https://doi.org/10.6084/m9.figshare.25897708.v1](https://doi.org/10.6084/m9.figshare.25897708.v1)
+- IRIS Not in Meta: [https://doi.org/10.6084/m9.figshare.25897708.v2](https://doi.org/10.6084/m9.figshare.25897708.v2)
 
-- IRIS No ID: [https://doi.org/10.6084/m9.figshare.25897759.v1](https://doi.org/10.6084/m9.figshare.25897759.v1)
+- IRIS No ID: [https://doi.org/10.6084/m9.figshare.25897759.v2](https://doi.org/10.6084/m9.figshare.25897759.v2)
