@@ -57,19 +57,19 @@
 <https://doi.org/10.6084/m9.figshare.25879420.v2> a dcat:Distribution ;
     dcterms:title "IRIS in Meta" ;
     dcterms:identifier "https://doi.org/10.6084/m9.figshare.25879420.v2" ;
-    dcterms:issued "2024-09-29"^^xsd:date .
+    dcterms:issued "2024-09-15"^^xsd:date .
 
 <https://doi.org/10.6084/m9.figshare.25879441.v2> a dcat:Distribution ;
     dcterms:title "IRIS in Index" ;
     dcterms:identifier "https://doi.org/10.6084/m9.figshare.25879441.v2" ;
-    dcterms:issued "2024-09-29"^^xsd:date .
+    dcterms:issued "2024-09-15"^^xsd:date .
 
 <https://doi.org/10.6084/m9.figshare.25897708.v2> a dcat:Distribution ;
     dcterms:title "IRIS Not in Meta" ;
     dcterms:identifier "https://doi.org/10.6084/m9.figshare.25897708.v2" ;
-    dcterms:issued "2024-09-29"^^xsd:date .
+    dcterms:issued "2024-09-15"^^xsd:date .
 
 <https://doi.org/10.6084/m9.figshare.25897759.v2> a dcat:Distribution ;
     dcterms:title "IRIS No ID" ;
     dcterms:identifier "https://doi.org/10.6084/m9.figshare.25897759.v2" ;
-    dcterms:issued "2024-09-29"^^xsd:date .
+    dcterms:issued "2024-09-15"^^xsd:date .
