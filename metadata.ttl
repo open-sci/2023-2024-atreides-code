@@ -1,0 +1,75 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Metadata about the software project
+<https://doi.org/10.5281/zenodo.11262416> a dcterms:Software ;
+    dcterms:title "open-sci/2023-2024-atreides-code: v3.0.0"@en ;
+    dcterms:description "A Python software developed for processing and analyzing the IRIS dataset, matching data with OpenCitations Meta and Index, and generating result datasets."@en ;
+    dcterms:type "Software" ;
+    dcterms:creator <https://orcid.org/0009-0003-7124-9639> , <https://orcid.org/0009-0007-4127-4875> , <https://orcid.org/0009-0006-0853-1772> ;
+    dcterms:issued "2024-09-15"^^xsd:date ;
+    dcterms:license <https://opensource.org/licenses/ISC> ;
+    dcterms:subject "Open Science", "OpenCitations", "IRIS", "OpenCitations Meta", "OpenCitations Index", "UNIBO" ;
+    dcterms:language "Python" ;
+    dcterms:requires "Python 3.11.5" , 
+                     "dask==2024.5.0" ,
+                     "polars==0.20.28" ,
+                     "python-dotenv==1.0.1" ,
+                     "Requests==2.32.2" ,
+                     "SPARQLWrapper==2.0.0" ,
+                     "tqdm==4.66.4" ;
+    dcterms:relation <https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v4> ;
+    dcat:accessURL <https://doi.org/10.5281/zenodo.11262416> , <https://github.com/open-sci/2023-2024-atreides-code/tree/v3.0.0> .
+
+
+# Metadata about each creator
+<https://orcid.org/0009-0003-7124-9639> a foaf:Person ;
+    foaf:name "Erica Andreose" ;
+    foaf:orcid "https://orcid.org/0009-0003-7124-9639" .
+
+<https://orcid.org/0009-0007-4127-4875> a foaf:Person ;
+    foaf:name "Leonardo Zilli" ;
+    foaf:orcid "https://orcid.org/0009-0007-4127-4875" .
+
+<https://orcid.org/0009-0006-0853-1772> a foaf:Person ;
+    foaf:name "Salvatore Di Marzo" ;
+    foaf:orcid "https://orcid.org/0009-0006-0853-1772" .
+
+# Metadata about the datasets used
+<https://doi.org/10.6092/unibo%2Famsacta%2F7608> a dcat:Distribution ;
+    dcterms:title "IRIS Dump (14 March 2024)" ;
+    dcterms:identifier "https://doi.org/10.6092/unibo%2Famsacta%2F7608" ;
+    dcterms:issued "2024-03-14"^^xsd:date .
+
+<https://doi.org/10.6084/m9.figshare.21747461.v8> a dcat:Distribution ;
+    dcterms:title "OpenCitations Meta April 2024 Dump" ;
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.21747461.v8" ;
+    dcterms:issued "2024-04-01"^^xsd:date .
+
+<https://doi.org/10.6084/m9.figshare.24356626.v2> a dcat:Distribution ;
+    dcterms:title "OpenCitations Index November 2023 Dump" ;
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.24356626.v2" ;
+    dcterms:issued "2023-11-01"^^xsd:date .
+
+# Metadata about the result datasets generated
+<https://doi.org/10.6084/m9.figshare.25879420.v2> a dcat:Distribution ;
+    dcterms:title "IRIS in Meta" ;
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25879420.v2" ;
+    dcterms:issued "2024-09-15"^^xsd:date .
+
+<https://doi.org/10.6084/m9.figshare.25879441.v2> a dcat:Distribution ;
+    dcterms:title "IRIS in Index" ;
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25879441.v2" ;
+    dcterms:issued "2024-09-15"^^xsd:date .
+
+<https://doi.org/10.6084/m9.figshare.25897708.v2> a dcat:Distribution ;
+    dcterms:title "IRIS Not in Meta" ;
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25897708.v2" ;
+    dcterms:issued "2024-09-15"^^xsd:date .
+
+<https://doi.org/10.6084/m9.figshare.25897759.v2> a dcat:Distribution ;
+    dcterms:title "IRIS No ID" ;
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25897759.v2" ;
+    dcterms:issued "2024-09-15"^^xsd:date .
