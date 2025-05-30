@@ -7,6 +7,11 @@ import polars as pl
 def read_iris(iris_path, not_filtered=False, no_id=False):
     iris_path = Path(iris_path)
 
+    if "2025-05-30" in iris_path.name:
+        subfolder = Path("POSTPROCESS-iris-data-2025-05-27")
+    else:
+        subfolder = Path("")
+
     if not iris_path.exists():
         raise FileNotFoundError(
             f"Folder '{str(iris_path)}' does not exist. Please download the IRIS dump and place it in the 'data/' folder."
@@ -14,11 +19,16 @@ def read_iris(iris_path, not_filtered=False, no_id=False):
 
     if str(iris_path).endswith(".zip"):
         df_iris_master = pl.read_csv(
-            ZipFile(iris_path).open("ODS_L1_IR_ITEM_MASTER_ALL.csv").read(),
+            ZipFile(iris_path)
+            .open(str(subfolder / "ODS_L1_IR_ITEM_MASTER_ALL.csv"))
+            .read(),
             columns=["ITEM_ID", "OWNING_COLLECTION", "OWNING_COLLECTION_DES"],
+            ignore_errors=True,
         )
         df_iris_identifier = pl.read_csv(
-            ZipFile(iris_path).open("ODS_L1_IR_ITEM_IDENTIFIER.csv").read(),
+            ZipFile(iris_path)
+            .open(str(subfolder / "ODS_L1_IR_ITEM_IDENTIFIER.csv"))
+            .read(),
             columns=["ITEM_ID", "IDE_DOI", "IDE_ISBN", "IDE_PMID"],
             dtypes={
                 "ITEM_ID": pl.Int64,
@@ -26,14 +36,16 @@ def read_iris(iris_path, not_filtered=False, no_id=False):
                 "IDE_ISBN": pl.Utf8,
                 "IDE_PMID": pl.Utf8,
             },
+            ignore_errors=True,
         )
     else:
         df_iris_master = pl.read_csv(
-            iris_path / "ODS_L1_IR_ITEM_MASTER_ALL.csv",
+            iris_path / subfolder / "ODS_L1_IR_ITEM_MASTER_ALL.csv",
             columns=["ITEM_ID", "OWNING_COLLECTION", "OWNING_COLLECTION_DES"],
+            ignore_errors=True,
         )
         df_iris_identifier = pl.read_csv(
-            iris_path / "ODS_L1_IR_ITEM_IDENTIFIER.csv",
+            iris_path / subfolder / "ODS_L1_IR_ITEM_IDENTIFIER.csv",
             columns=["ITEM_ID", "IDE_DOI", "IDE_ISBN", "IDE_PMID"],
             dtypes={
                 "ITEM_ID": pl.Int64,
@@ -51,28 +63,38 @@ def read_iris(iris_path, not_filtered=False, no_id=False):
     if no_id:
         if str(iris_path).endswith(".zip"):
             df_iris_date_author = pl.read_csv(
-                ZipFile(iris_path).open("ODS_L1_IR_ITEM_MASTER_ALL.csv").read(),
+                ZipFile(iris_path)
+                .open(str(subfolder / "ODS_L1_IR_ITEM_MASTER_ALL.csv"))
+                .read(),
                 columns=["ITEM_ID", "DATE_ISSUED_YEAR", "TITLE"],
             )
             df_iris_description = pl.read_csv(
-                ZipFile(iris_path).open("ODS_L1_IR_ITEM_DESCRIPTION.csv").read(),
+                ZipFile(iris_path)
+                .open(str(subfolder / "ODS_L1_IR_ITEM_DESCRIPTION.csv"))
+                .read(),
                 columns=["ITEM_ID", "DES_ALLPEOPLE", "DES_NUMBEROFAUTHORS"],
             )
             df_iris_publisher = pl.read_csv(
-                ZipFile(iris_path).open("ODS_L1_IR_ITEM_PUBLISHER.csv").read(),
+                ZipFile(iris_path)
+                .open(str(subfolder / "ODS_L1_IR_ITEM_PUBLISHER.csv"))
+                .read(),
                 columns=["ITEM_ID", "PUB_NAME", "PUB_PLACE", "PUB_COUNTRY"],
             )
             df_iris_language = pl.read_csv(
-                ZipFile(iris_path).open("ODS_L1_IR_ITEM_LANGUAGE.csv").read(),
+                ZipFile(iris_path)
+                .open(str(subfolder / "ODS_L1_IR_ITEM_LANGUAGE.csv"))
+                .read(),
                 columns=["ITEM_ID", "LAN_ISO"],
             )
         else:
             df_iris_description = pl.read_csv(
-                iris_path / "ODS_L1_IR_ITEM_DESCRIPTION.csv",
+                iris_path / subfolder / "ODS_L1_IR_ITEM_DESCRIPTION.csv",
                 columns=["ITEM_ID", "DES_ALLPEOPLE", "DES_NUMBEROFAUTHORS"],
             )
             df_iris_date_author = pl.read_csv(
-                ZipFile(iris_path).open("ODS_L1_IR_ITEM_MASTER_ALL.csv").read(),
+                ZipFile(iris_path)
+                .open(str(subfolder / "ODS_L1_IR_ITEM_MASTER_ALL.csv"))
+                .read(),
                 columns=[
                     "ITEM_ID",
                     "OWNING_COLLECTION",
@@ -82,11 +104,11 @@ def read_iris(iris_path, not_filtered=False, no_id=False):
                 ],
             )
             df_iris_publisher = pl.read_csv(
-                iris_path / "ODS_L1_IR_ITEM_PUBLISHER.csv",
+                iris_path / subfolder / "ODS_L1_IR_ITEM_PUBLISHER.csv",
                 columns=["ITEM_ID", "PUB_NAME", "PUB_PLACE", "PUB_COUNTRY"],
             )
             df_iris_language = pl.read_csv(
-                iris_path / "ODS_L1_IR_ITEM_LANGUAGE.csv",
+                iris_path / subfolder / "ODS_L1_IR_ITEM_LANGUAGE.csv",
                 columns=["ITEM_ID", "LAN_ISO"],
             )
 
