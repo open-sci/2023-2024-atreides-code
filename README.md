@@ -1,7 +1,7 @@
 # 2023-2024-atreides-code
 The repository for the team Atreides of the Open Science course a.a. 2023/2024
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11262417.svg)](https://doi.org/10.5281/zenodo.11262417)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11262416.svg)](https://doi.org/10.5281/zenodo.11262416)
 [![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/open-sci/2023-2024-atreides-code/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/open-sci/2023-2024-atreides-code)
 
 ## Usage

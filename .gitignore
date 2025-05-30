@@ -1,8 +1,7 @@
 data/*
-pp_data/*
-src/__pycache__/*
-__pycache__/*
-arrow-rs/*
+*.egg-info/
+__pycache__/
+build/
 *.env
 *.pkl
-/*.ipynb
+venv/

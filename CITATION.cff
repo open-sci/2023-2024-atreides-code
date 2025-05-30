@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software in your research, please cite it using the metadata below."
+title: "2023-2024-atreides-code"
+version: "1.0.0"
+doi: "10.5281/zenodo.11262416"
+date-released: 2024-05-28
+authors:
+  - family-names: Zilli
+    given-names: Leonardo
+    orcid: https://orcid.org/0009-0007-4127-4875
+    affiliation: University of Bologna
+  - family-names: Andreose
+    given-names: Erica
+    orcid: https://orcid.org/0009-0003-7124-9639
+    affiliation: University of Bologna
+  - family-names: Di Marzo
+    given-names: Salvatore
+    orcid: https://orcid.org/0009-0006-0853-1772
+    affiliation: University of Bologna
+
+repository-code: https://github.com/open-sci/2023-2024-atreides-code
+url: https://github.com/open-sci/2023-2024-atreides-code
+license: ISC
+keywords:
+  - Open Science
+  - OpenCitations
+  - Bibliographic Metadata
+  - Research Software
