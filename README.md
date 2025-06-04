@@ -8,8 +8,6 @@ The repository for the team Atreides of the Open Science course a.a. 2023/2024
 
 ### Installation
 
-**Note**: Python 3.11.5 or previous versions are required to run the software.
-
 ```sh
 # Clone the repository
 git clone https://github.com/open-sci/2023-2024-atreides-code
@@ -17,8 +15,8 @@ git clone https://github.com/open-sci/2023-2024-atreides-code
 # Move to the repository folder
 cd 2023-2024-atreides-code
 
-# Install the package and dependencies
-pip install .
+# Install required dependencies
+pip install -r requirements.txt
 ```
 
 ### Run the software

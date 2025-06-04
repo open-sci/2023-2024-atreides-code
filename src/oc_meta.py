@@ -234,7 +234,7 @@ def process_meta_zip(zip_path, iris_path):
                     .drop(["doi", "pmid", "isbn"])
                     .drop_nulls("id")
                     .join(dois_isbns_pmids_lf, on="id", how="inner")
-                    .collect(streaming=True)
+                    .collect()
                 )
 
             if not df.is_empty():
@@ -293,4 +293,4 @@ def create_iris_noid(iris_path):
 
     iris_noid.write_parquet(output_inoid / "iris_no_id.parquet")
 
-    print(f"Iris No ID saved to '{output_inoid}/iris_not_in_meta.parquet'")
+    print(f"Iris No ID saved to '{output_inoid}/iris_no_id.parquet'")
