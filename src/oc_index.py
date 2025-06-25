@@ -1,79 +1,94 @@
 import os
-from zipfile import ZipFile
 import shutil
-
-import argparse
 from pathlib import Path
-
-from tqdm import tqdm
-
-import polars as pl
-
+from zipfile import ZipFile
 import glob
+import logging
 
 import dask.dataframe as dd
-from dask.diagnostics import ProgressBar
+import polars as pl
+from tqdm import tqdm
+from tqdm.dask import TqdmCallback
 
 from iris_in_meta import get_omids_list
 
-ProgressBar().register()
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
-def process_index_dump(index_path):
-    if not os.path.isdir("data/iris_in_meta"):
-        raise FileNotFoundError(
-            "Folder 'data/iris_in_meta' does not exist. Please create the 'iris_in_meta' dataset first"
-        )
+DATA_DIR = Path("data")
+IRIS_IN_META_DIR = DATA_DIR / "iris_in_meta"
+IRIS_IN_INDEX_DIR = DATA_DIR / "iris_in_index"
 
-    # unzip the internal archives
-    if index_path.endswith(".zip"):
-        extraction_dir = index_path.replace(".zip", "")
+
+def unzip_index_dump(index_path: Path) -> Path:
+    if not index_path.exists():
+        raise FileNotFoundError(f"Index file {index_path} not found.")
+
+    if index_path.suffix == ".zip":
+        extraction_dir = index_path.with_suffix("")
+        logging.info(f"Unzipping {index_path} to {extraction_dir}")
         with ZipFile(index_path, "r") as zip_ref:
             zip_ref.extractall(extraction_dir)
-        index_path = extraction_dir
+        return extraction_dir
 
-    file_names = [
-        Path(index_path) / Path(archive) for archive in os.listdir(index_path)
-    ]
+    return index_path
 
-    omids_list = get_omids_list()
 
-    output_dir = Path("data/iris_in_index")
-
-    for archive in tqdm(file_names):
-        zip_file = ZipFile(archive)
-
-        csvs = ["zip://" + n for n in zip_file.namelist() if n.endswith(".csv")]
+def read_and_filter_zip(archive_path: Path, omids_list: set) -> dd.DataFrame:
+    with ZipFile(archive_path) as zip_file:
+        csv_files = [
+            f"zip://{name}" for name in zip_file.namelist() if name.endswith(".csv")
+        ]
+        if not csv_files:
+            logging.warning(f"No CSV files found in {archive_path}")
+            return dd.from_pandas(dd.DataFrame(), npartitions=1)
 
         ddf = dd.read_csv(
-            csvs,
+            csv_files,
             storage_options={"fo": zip_file.filename},
-            usecols=["id", "citing", "cited"],
+            usecols=["id", "citing", "cited", "creation"],
+            dtype={"creation": "string"},
         )
-        ddf = ddf[ddf["cited"].isin(omids_list) | ddf["citing"].isin(omids_list)]
-        ddf.to_parquet(output_dir / archive.stem, write_index=False)
-
-    iii_glob = glob.glob(str(output_dir / "*" / "*.parquet"))
-    iii = pl.scan_parquet(iii_glob)
-    iii.sink_parquet(output_dir / "iris_in_index.parquet")
-
-    for item in os.listdir(output_dir):
-        item_path = os.path.join(output_dir, item)
-
-        if os.path.isdir(item_path):
-            shutil.rmtree(item_path)
+        return ddf[(ddf["cited"].isin(omids_list)) | (ddf["citing"].isin(omids_list))]
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Process zip file containing OpenCitations Index CSV files"
-    )
-    parser.add_argument(
-        "-index",
-        "--index_dump",
-        type=str,
-        help="Path to the OpenCitations Index dump folder",
-    )
+def create_iris_in_index(index_path_str: str) -> None:
+    if not IRIS_IN_META_DIR.exists():
+        raise FileNotFoundError(
+            f"Folder '{IRIS_IN_META_DIR}' does not exist. Please create the 'iris_in_meta' dataset first."
+        )
 
-    args = parser.parse_args()
-    process_index_dump(args.index_dump)
+    index_path = Path(index_path_str)
+    index_dir = unzip_index_dump(index_path)
+
+    archives = [index_dir / f for f in os.listdir(index_dir) if f.endswith(".zip")]
+    omids_list = set(get_omids_list())
+
+    IRIS_IN_INDEX_DIR.mkdir(parents=True, exist_ok=True)
+
+    for archive in tqdm(archives, desc="Processing OC Index archives", leave=False):
+        with TqdmCallback(desc=archive.stem):
+            ddf_filtered = read_and_filter_zip(archive, omids_list)
+            if not len(ddf_filtered.index) == 0:
+                archive_output_dir = IRIS_IN_INDEX_DIR / archive.stem
+                ddf_filtered.to_parquet(archive_output_dir, write_index=False)
+
+    parquet_files = glob.glob(str(IRIS_IN_INDEX_DIR / "*" / "*.parquet"))
+    if parquet_files:
+        final_df = (
+            pl.scan_parquet(parquet_files)
+            .filter(~pl.col("creation").is_null())
+            .with_columns(
+                pl.col("creation")
+                .str.extract(r"\d{4}", 0)
+                .cast(pl.Int32)
+                .alias("citing_year")
+            )
+            .filter(pl.col("citing_year") <= 2024)
+        )
+
+        final_df.sink_parquet(IRIS_IN_INDEX_DIR / "iris_in_index.parquet")
+
+    for item in IRIS_IN_INDEX_DIR.iterdir():
+        if item.is_dir():
+            shutil.rmtree(item)

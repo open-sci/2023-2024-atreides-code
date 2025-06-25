@@ -125,8 +125,8 @@ def handle_duplicates(df, prefix, priority=None, exclude_type=None):
     else:
         keep_df = filtered_df.unique("id", keep="first", maintain_order=True)
 
-    #if prefix == "pmid:":
-        #keep_df = keep_df.filter(pl.col("iris_type") != 40)
+    # if prefix == "pmid:":
+    # keep_df = keep_df.filter(pl.col("iris_type") != 40)
 
     drop_df = filtered_df.join(keep_df, on="iris_id", how="anti").select("iris_id")
 
@@ -134,9 +134,6 @@ def handle_duplicates(df, prefix, priority=None, exclude_type=None):
 
 
 def filter_dois(df) -> pl.DataFrame:
-    """
-    Filter and normalize DOIs from the IRIS DataFrame.
-    """
     dois = df.select("ITEM_ID", "IDE_DOI", "OWNING_COLLECTION").drop_nulls("IDE_DOI")
 
     filtered_dois = (
@@ -157,9 +154,6 @@ def filter_dois(df) -> pl.DataFrame:
 
 
 def filter_pmids(df) -> pl.DataFrame:
-    """
-    Filter and normalize PMIDs from the IRIS DataFrame.
-    """
     pmids = df.select("ITEM_ID", "IDE_PMID", "OWNING_COLLECTION").drop_nulls("IDE_PMID")
 
     filtered_pmids = (
@@ -181,9 +175,6 @@ def filter_pmids(df) -> pl.DataFrame:
 
 
 def filter_isbns(df) -> pl.DataFrame:
-    """
-    Filter and normalize ISBNs from the IRIS DataFrame.
-    """
     isbns = df.select("ITEM_ID", "IDE_ISBN", "OWNING_COLLECTION").drop_nulls("IDE_ISBN")
 
     filtered_isbns = (
@@ -225,7 +216,7 @@ def get_iris_pids(iris_path) -> pl.DataFrame:
         dois_pmids_isbns_filtered.filter(pl.col("id").is_duplicated())
         .sort("id")
         .with_columns(pl.col("iris_type"))
-    )#.replace(type_dict))
+    )  # .replace(type_dict))
 
     doi_priority = {35: 1, 50: 2, 41: 3, 57: 4}
     pmid_priority = {35: 1}
@@ -243,7 +234,7 @@ def get_iris_pids(iris_path) -> pl.DataFrame:
     return final_filtered_df
 
 
-def get_iris_type_dict(iris_path):
+def get_iris_type_dict(iris_path) -> dict:
     iris_df = read_iris(iris_path, not_filtered=True)
     type_df = (
         iris_df[["OWNING_COLLECTION", "OWNING_COLLECTION_DES"]]

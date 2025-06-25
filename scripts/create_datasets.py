@@ -2,21 +2,22 @@ import argparse
 
 from pathlib import Path
 import sys
+
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 
-from oc_meta import (
-    process_meta,
+from src.oc_meta import (
+    create_iris_in_meta,
     search_for_titles,
     create_iris_not_in_meta,
     create_iris_noid,
 )
-from oc_index import process_index_dump
+from src.oc_index import create_iris_in_index
 
 
 def main(args):
     if args.iris_in_meta:
-        process_meta(args.meta_path, args.iris_path)
+        create_iris_in_meta(args.meta_path, args.iris_path)
 
     if args.iris_not_in_meta:
         create_iris_not_in_meta(args.iris_path)
@@ -33,7 +34,7 @@ def main(args):
                 "Please provide the path to the OpenCitations Index dump folder by specifying the -index argument."
             )
             exit(1)
-        process_index_dump(args.index_path)
+        create_iris_in_index(args.index_path)
 
 
 if __name__ == "__main__":

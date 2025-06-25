@@ -64,15 +64,15 @@ For more detailed guidelines consult the protocol for the software:
 
 ## Download original datasets
 
-- IRIS dump (14 March 2024): [https://doi.org/10.6092/unibo%2Famsacta%2F7608](https://doi.org/10.6092/unibo%2Famsacta%2F7608)
+- UNIBO IRIS bibliographic data dump, dated 30 May 2025: [https://doi.org/10.6092/unibo/amsacta/8374](https://doi.org/10.6092/unibo/amsacta/8374)
 
-- OpenCitations Meta April 2024 Dump: [https://doi.org/10.6084/m9.figshare.21747461.v8](https://doi.org/10.6084/m9.figshare.21747461.v8)
+- OpenCitations Meta CSV dataset of all bibliographic metadata (February 2025): [https://doi.org/10.6084/m9.figshare.21747461.v11](https://doi.org/10.6084/m9.figshare.21747461.v11)
 
-- OpenCitations Index November 2023 Dump: [https://doi.org/10.6084/m9.figshare.24356626.v2](https://doi.org/10.6084/m9.figshare.24356626.v2)
+- OpenCitations Index CSV dataset of all the citation data (March 2025): [https://doi.org/10.6084/m9.figshare.24356626.v4](https://doi.org/10.6084/m9.figshare.24356626.v4)
 
 
 
-## Result datasets
+## Output datasets
 
 - IRIS in Meta: [https://doi.org/10.6084/m9.figshare.25879420.v2](https://doi.org/10.6084/m9.figshare.25879420.v2)
 
