@@ -1,4 +1,5 @@
 import io
+import logging
 import os
 import tarfile
 import tempfile
@@ -6,7 +7,6 @@ from pathlib import Path
 from typing import Optional, Union
 from urllib.error import HTTPError
 from zipfile import ZipFile
-import logging
 
 import polars as pl
 from dotenv import load_dotenv
@@ -161,7 +161,7 @@ def create_iris_in_meta(archive_path: str, iris_path: Path) -> None:
     else:
         raise ValueError("Unsupported archive format. Please use .zip or .tar.")
 
-    final_df = (
+    final_lf = (
         pl.scan_parquet(temp_parquet_dir / "*.parquet")
         .filter(~pl.col("pub_date").is_null())
         .with_columns(
@@ -206,25 +206,40 @@ def _process_zip_archive(zip_path: str, iris_pids_lf: pl.LazyFrame, temp_dir: Pa
                     )
 
 
-def _process_tar_archive(tar_path: str, iris_pids_lf: pl.LazyFrame, temp_dir: Path):
+def _save_batches(batched_dfs: list[pl.DataFrame], batch_idx: int, temp_dir: Path):
+    if batched_dfs:
+        batch_df = pl.concat(batched_dfs)
+        batch_file = temp_dir / f"batch_{batch_idx:04d}.parquet"
+        batch_df.write_parquet(batch_file)
+
+
+def _process_tar_archive(
+    tar_path: str, iris_pids_lf: pl.LazyFrame, temp_dir: Path, batch_size: int = 1000
+):
     with tarfile.open(tar_path, "r:*") as archive:
         csv_members = (
             member
             for member in archive
             if member.isfile() and member.name.endswith(".csv")
         )
-        for i, csv_member in tqdm(
-            enumerate(csv_members), desc="Processing Meta CSV files"
-        ):
-            if csv_member.isfile() and csv_member.name.endswith(".csv"):
-                with archive.extractfile(csv_member) as file:
-                    df = _process_chunk(file, iris_pids_lf)
 
-                    if not df.is_empty():
-                        df.write_parquet(
-                            temp_dir
-                            / f"{os.path.basename(csv_member.name).replace('.csv', '.parquet')}"
-                        )
+        batched_dfs = []
+        batch_idx = 0
+
+        for i, csv_member in enumerate(
+            tqdm(csv_members, desc="Processing Meta CSV files")
+        ):
+            with archive.extractfile(csv_member) as file:
+                df = _process_chunk(file, iris_pids_lf)
+                if df is not None and not df.is_empty():
+                    batched_dfs.append(df)
+
+                    if len(batched_dfs) >= batch_size:
+                        _save_batches(batched_dfs, batch_idx, temp_dir)
+                        batch_idx += 1
+                        batched_dfs = []
+
+        _save_batches(batched_dfs, batch_idx, temp_dir)
 
 
 def create_iris_not_in_meta(iris_path: Path):
