@@ -34,7 +34,7 @@ def main(args):
                 "Please provide the path to the OpenCitations Index dump folder by specifying the -index argument."
             )
             exit(1)
-        create_iris_in_index(args.index_path)
+        create_iris_in_index(args.index_path, args.year_cutoff)
 
 
 if __name__ == "__main__":
@@ -90,7 +90,13 @@ if __name__ == "__main__":
         default=False,
         help="Create the Iris No ID dataset containing all the entities with no external IDs in IRIS.",
     )
-
+    parser.add_argument(
+        "-yc",
+        "--year_cutoff",
+        type=int,
+        default=None,
+        help="If not specified, all years will be included.",
+    )
     parser.add_argument(
         "--search_for_titles",
         action="store_true",

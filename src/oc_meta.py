@@ -139,7 +139,9 @@ def _process_chunk(
     return df
 
 
-def create_iris_in_meta(archive_path: str, iris_path: Path) -> None:
+def create_iris_in_meta(
+    archive_path: str, iris_path: Path, year_cutoff: Optional[int] = None
+) -> None:
     IRIS_IN_META_DIR.mkdir(parents=True, exist_ok=True)
     temp_parquet_dir = IRIS_IN_META_DIR / "temp_chunks"
     temp_parquet_dir.mkdir(exist_ok=True)
@@ -177,15 +179,27 @@ def create_iris_in_meta(archive_path: str, iris_path: Path) -> None:
         .rename({"type": "meta_type"})
     )
 
-    output_file = IRIS_IN_META_DIR / "iris_in_meta.parquet"
-    final_df.sink_parquet(output_file)
+    if year_cutoff is not None:
+        logging.info(f"Applying year cutoff: citing_year <= {year_cutoff}")
+        final_lf = (
+            final_lf.filter(~pl.col("pub_date").is_null())
+            .with_columns(
+                pl.col("pub_date")
+                .str.extract(r"(\d{4})", 1)
+                .cast(pl.Int32, strict=False)
+                .alias("pub_year")
+            )
+            .filter(pl.col("pub_year") <= year_cutoff)
+        )
 
-    # Cleanup temporary files
+    output_file = IRIS_IN_META_DIR / "iris_in_meta.parquet"
+    final_lf.sink_parquet(output_file)
+    logging.info(f"Processing complete. Iris In Meta saved to '{output_file}'")
+
+    logging.info(f"Processing complete. Iris In Meta saved to '{output_file}'")
     for file in temp_parquet_dir.iterdir():
         file.unlink()
     temp_parquet_dir.rmdir()
-
-    logging.info(f"Processing complete. Iris In Meta saved to '{output_file}'")
 
 
 def _process_zip_archive(zip_path: str, iris_pids_lf: pl.LazyFrame, temp_dir: Path):

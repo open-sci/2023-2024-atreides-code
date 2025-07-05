@@ -1,10 +1,10 @@
 import io
 import logging
 import shutil
-from pathlib import Path
-from zipfile import ZipFile, BadZipFile
 from multiprocessing import Pool, cpu_count
+from pathlib import Path
 from typing import Optional, Set
+from zipfile import BadZipFile, ZipFile
 
 import pandas as pd
 import polars as pl
@@ -30,14 +30,7 @@ def process_single_zip(args: tuple[Path, Path, Set[str]]) -> tuple[str, int]:
         with ZipFile(zip_path, "r") as zf:
             csv_files_in_zip = [name for name in zf.namelist() if name.endswith(".csv")]
 
-            progress_bar = tqdm(
-                csv_files_in_zip,
-                desc=f"-> {zip_path.stem[:35]:<35}",
-                position=1,
-                leave=False,
-                unit="csv",
-            )
-            for csv_filename in progress_bar:
+            for csv_filename in csv_files_in_zip:
                 try:
                     with zf.open(csv_filename, "r") as csv_file:
                         text_file = io.TextIOWrapper(csv_file, encoding="utf-8")
@@ -126,29 +119,23 @@ def create_iris_in_index(
             tqdm(
                 pool.imap_unordered(process_single_zip, tasks),
                 total=len(tasks),
-                desc="Processing Citation Archives",
+                desc="Processing OC Index Archives",
             )
         )
 
-    successful_count = sum(1 for r in results if r[1] > 0)
-    logging.info(
-        f"Finished parallel processing. {successful_count} archives contained matching data."
-    )
+    logging.info("Finished processing.")
 
     intermediate_files = list(TEMP_PARQUET_DIR.glob("*.parquet"))
     if not intermediate_files:
         logging.warning("No matching data found. No final file will be created.")
         return
 
-    final_lazy_df = (
-        pl.scan_parquet(intermediate_files)
-    )
+    final_lf = pl.scan_parquet(intermediate_files)
 
     if year_cutoff is not None:
         logging.info(f"Applying year cutoff: citing_year <= {year_cutoff}")
-        final_lazy_df = (
-            final_lazy_df
-            .filter(~pl.col("creation").is_null())
+        final_lf = (
+            final_lf.filter(~pl.col("creation").is_null())
             .with_columns(
                 pl.col("creation")
                 .str.extract(r"(\d{4})", 1)
@@ -159,13 +146,9 @@ def create_iris_in_index(
         )
 
     final_output_path = IRIS_IN_INDEX_DIR / "iris_in_index.parquet"
-    final_lazy_df.sink_parquet(final_output_path)
+    final_lf.sink_parquet(final_output_path)
 
-    logging.info(
-        f"Saved final dataset to '{final_output_path}'"
-    )
+    logging.info(f"Iris In Index saved to '{final_output_path}'")
 
     logging.info("Cleaning up temporary directory...")
     shutil.rmtree(TEMP_PARQUET_DIR)
-
-    logging.info("✅ Pipeline complete!")
