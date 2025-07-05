@@ -1,94 +1,171 @@
-import os
+import io
+import logging
 import shutil
 from pathlib import Path
-from zipfile import ZipFile
-import glob
-import logging
+from zipfile import ZipFile, BadZipFile
+from multiprocessing import Pool, cpu_count
+from typing import Optional, Set
 
-import dask.dataframe as dd
+import pandas as pd
 import polars as pl
 from tqdm import tqdm
-from tqdm.dask import TqdmCallback
 
-from iris_in_meta import get_omids_list
+from src.iris_in_meta import get_omids_list
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
 
 DATA_DIR = Path("data")
 IRIS_IN_META_DIR = DATA_DIR / "iris_in_meta"
 IRIS_IN_INDEX_DIR = DATA_DIR / "iris_in_index"
+TEMP_PARQUET_DIR = IRIS_IN_INDEX_DIR / "tmp"
+
+N_PROCESSES = cpu_count()
 
 
-def unzip_index_dump(index_path: Path) -> Path:
-    if not index_path.exists():
-        raise FileNotFoundError(f"Index file {index_path} not found.")
+def process_single_zip(args: tuple[Path, Path, Set[str]]) -> tuple[str, int]:
+    zip_path, temp_output_dir, omids_set = args
 
-    if index_path.suffix == ".zip":
-        extraction_dir = index_path.with_suffix("")
-        logging.info(f"Unzipping {index_path} to {extraction_dir}")
-        with ZipFile(index_path, "r") as zip_ref:
-            zip_ref.extractall(extraction_dir)
-        return extraction_dir
+    try:
+        filtered_chunks = []
+        with ZipFile(zip_path, "r") as zf:
+            csv_files_in_zip = [name for name in zf.namelist() if name.endswith(".csv")]
 
-    return index_path
+            progress_bar = tqdm(
+                csv_files_in_zip,
+                desc=f"-> {zip_path.stem[:35]:<35}",
+                position=1,
+                leave=False,
+                unit="csv",
+            )
+            for csv_filename in progress_bar:
+                try:
+                    with zf.open(csv_filename, "r") as csv_file:
+                        text_file = io.TextIOWrapper(csv_file, encoding="utf-8")
+                        reader = pd.read_csv(
+                            text_file,
+                            chunksize=100_000,
+                            usecols=["id", "citing", "cited", "creation"],
+                            dtype={
+                                "id": "string",
+                                "citing": "string",
+                                "cited": "string",
+                                "creation": "string",
+                            },
+                            low_memory=False,
+                        )
+                        for chunk in reader:
+                            mask = chunk["cited"].isin(omids_set) | chunk[
+                                "citing"
+                            ].isin(omids_set)
+                            if mask.any():
+                                filtered_chunks.append(chunk[mask])
+                except Exception as e:
+                    logging.warning(
+                        f"Could not process CSV '{csv_filename}' in '{zip_path.name}': {e}"
+                    )
 
+        if not filtered_chunks:
+            return (zip_path.name, 0)
 
-def read_and_filter_zip(archive_path: Path, omids_list: set) -> dd.DataFrame:
-    with ZipFile(archive_path) as zip_file:
-        csv_files = [
-            f"zip://{name}" for name in zip_file.namelist() if name.endswith(".csv")
-        ]
-        if not csv_files:
-            logging.warning(f"No CSV files found in {archive_path}")
-            return dd.from_pandas(dd.DataFrame(), npartitions=1)
+        df_combined = pd.concat(filtered_chunks, ignore_index=True)
+        output_path = temp_output_dir / f"{zip_path.stem}.parquet"
+        df_combined.to_parquet(output_path, engine="pyarrow")
+        return (zip_path.name, len(df_combined))
 
-        ddf = dd.read_csv(
-            csv_files,
-            storage_options={"fo": zip_file.filename},
-            usecols=["id", "citing", "cited", "creation"],
-            dtype={"creation": "string"},
+    except BadZipFile:
+        logging.error(f"Could not open {zip_path.name}, it may be corrupted.")
+        return (zip_path.name, -1)
+    except Exception as e:
+        logging.error(
+            f"A critical error occurred while processing {zip_path.name}: {e}"
         )
-        return ddf[(ddf["cited"].isin(omids_list)) | (ddf["citing"].isin(omids_list))]
+        return (zip_path.name, -1)
 
 
-def create_iris_in_index(index_path_str: str) -> None:
+def create_iris_in_index(
+    index_path_str: str, year_cutoff: Optional[int] = None
+) -> None:
     if not IRIS_IN_META_DIR.exists():
         raise FileNotFoundError(
             f"Folder '{IRIS_IN_META_DIR}' does not exist. Please create the 'iris_in_meta' dataset first."
         )
 
     index_path = Path(index_path_str)
-    index_dir = unzip_index_dump(index_path)
+    if not index_path.exists():
+        raise FileNotFoundError(f"Index dump file/folder '{index_path}' not found.")
 
-    archives = [index_dir / f for f in os.listdir(index_dir) if f.endswith(".zip")]
-    omids_list = set(get_omids_list())
+    if index_path.is_file() and index_path.suffix == ".zip":
+        index_dir = index_path.with_suffix("")
+        if not index_dir.exists():
+            logging.info(f"Unzipping main index dump: {index_path} -> {index_dir}")
+            with ZipFile(index_path, "r") as zip_ref:
+                zip_ref.extractall(index_dir)
+    else:
+        index_dir = index_path
 
     IRIS_IN_INDEX_DIR.mkdir(parents=True, exist_ok=True)
+    if TEMP_PARQUET_DIR.exists():
+        shutil.rmtree(TEMP_PARQUET_DIR)
+    TEMP_PARQUET_DIR.mkdir()
 
-    for archive in tqdm(archives, desc="Processing OC Index archives", leave=False):
-        with TqdmCallback(desc=archive.stem):
-            ddf_filtered = read_and_filter_zip(archive, omids_list)
-            if not len(ddf_filtered.index) == 0:
-                archive_output_dir = IRIS_IN_INDEX_DIR / archive.stem
-                ddf_filtered.to_parquet(archive_output_dir, write_index=False)
+    omids_list_set = set(get_omids_list())
+    archives = sorted(list(index_dir.glob("*.zip")))
 
-    parquet_files = glob.glob(str(IRIS_IN_INDEX_DIR / "*" / "*.parquet"))
-    if parquet_files:
-        final_df = (
-            pl.scan_parquet(parquet_files)
+    if not archives:
+        logging.warning(f"No .zip archives found in '{index_dir}'. Aborting.")
+        return
+
+    logging.info(
+        f"Found {len(archives)} archives. Starting parallel processing with {N_PROCESSES} workers."
+    )
+
+    tasks = [(archive, TEMP_PARQUET_DIR, omids_list_set) for archive in archives]
+
+    with Pool(processes=N_PROCESSES) as pool:
+        results = list(
+            tqdm(
+                pool.imap_unordered(process_single_zip, tasks),
+                total=len(tasks),
+                desc="Processing Citation Archives",
+            )
+        )
+
+    successful_count = sum(1 for r in results if r[1] > 0)
+    logging.info(
+        f"Finished parallel processing. {successful_count} archives contained matching data."
+    )
+
+    intermediate_files = list(TEMP_PARQUET_DIR.glob("*.parquet"))
+    if not intermediate_files:
+        logging.warning("No matching data found. No final file will be created.")
+        return
+
+    final_lazy_df = (
+        pl.scan_parquet(intermediate_files)
+    )
+
+    if year_cutoff is not None:
+        logging.info(f"Applying year cutoff: citing_year <= {year_cutoff}")
+        final_lazy_df = (
+            final_lazy_df
             .filter(~pl.col("creation").is_null())
             .with_columns(
                 pl.col("creation")
-                .str.extract(r"\d{4}", 0)
-                .cast(pl.Int32)
+                .str.extract(r"(\d{4})", 1)
+                .cast(pl.Int32, strict=False)
                 .alias("citing_year")
             )
-            .filter(pl.col("citing_year") <= 2024)
+            .filter(pl.col("citing_year") <= year_cutoff)
         )
 
-        final_df.sink_parquet(IRIS_IN_INDEX_DIR / "iris_in_index.parquet")
+    final_output_path = IRIS_IN_INDEX_DIR / "iris_in_index.parquet"
+    final_lazy_df.sink_parquet(final_output_path)
 
-    for item in IRIS_IN_INDEX_DIR.iterdir():
-        if item.is_dir():
-            shutil.rmtree(item)
+    logging.info(
+        f"Saved final dataset to '{final_output_path}'"
+    )
+
+    logging.info("Cleaning up temporary directory...")
+    shutil.rmtree(TEMP_PARQUET_DIR)
+
+    logging.info("✅ Pipeline complete!")
