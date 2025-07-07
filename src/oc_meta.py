@@ -194,9 +194,8 @@ def create_iris_in_meta(
 
     output_file = IRIS_IN_META_DIR / "iris_in_meta.parquet"
     final_lf.sink_parquet(output_file)
-    logging.info(f"Processing complete. Iris In Meta saved to '{output_file}'")
-
-    logging.info(f"Processing complete. Iris In Meta saved to '{output_file}'")
+    logging.info("Processing complete")
+    logging.info(f"Iris In Meta saved to '{output_file}'")
     for file in temp_parquet_dir.iterdir():
         file.unlink()
     temp_parquet_dir.rmdir()
