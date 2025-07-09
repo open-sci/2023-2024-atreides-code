@@ -20,7 +20,7 @@ def _read_csv_from_folder(
     )
 
 
-def read_iris(iris_path, not_filtered=False, no_id=False) -> pl.DataFrame:
+def read_iris(iris_path, pub_years=False, not_filtered=False, no_id=False) -> pl.DataFrame:
     iris_path = Path(iris_path)
 
     subfolder = (
@@ -46,7 +46,7 @@ def read_iris(iris_path, not_filtered=False, no_id=False) -> pl.DataFrame:
 
     df_iris_master = read_csv(
         "ODS_L1_IR_ITEM_MASTER_ALL.csv",
-        columns=["ITEM_ID", "OWNING_COLLECTION", "OWNING_COLLECTION_DES"],
+        columns=["ITEM_ID", "OWNING_COLLECTION", "OWNING_COLLECTION_DES", "DATE_ISSUED_YEAR"],
     )
     df_iris_identifier = read_csv(
         "ODS_L1_IR_ITEM_IDENTIFIER.csv",
@@ -198,9 +198,18 @@ def filter_isbns(df) -> pl.DataFrame:
     return filtered_isbns
 
 
-def get_iris_pids(iris_path) -> pl.DataFrame:
+def get_iris_pub_years(iris_path) -> pl.DataFrame:
+    return read_iris(iris_path, pub_years=True).select(
+        pl.col("ITEM_ID").alias("ITEM_ID"),
+        pl.col("DATE_ISSUED_YEAR").cast(pl.Int32, strict=False).alias("iris_pub_year"),
+    )
+
+
+
+def get_iris_pids(iris_path, include_pub_year: bool=False) -> pl.DataFrame:
     df_filtered = read_iris(iris_path)
 
+    # need to bake the issued year into these
     filtered_dois = filter_dois(df_filtered)
     filtered_pmids = filter_pmids(df_filtered)
     filtered_isbns = filter_isbns(df_filtered)
@@ -230,6 +239,13 @@ def get_iris_pids(iris_path) -> pl.DataFrame:
     final_filtered_df = dois_pmids_isbns_filtered.join(
         all_drops, on="iris_id", how="anti"
     )
+
+    if include_pub_year:
+        final_filtered_df = final_filtered_df.join(
+            get_iris_pub_years(iris_path),
+            left_on="iris_id",
+            right_on="ITEM_ID",
+        )
 
     return final_filtered_df
 

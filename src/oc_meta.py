@@ -15,7 +15,7 @@ from SPARQLWrapper import JSON, SPARQLWrapper
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from tqdm import tqdm
 
-from src.iris import get_iris_pids, get_iris_type_dict, read_iris
+from src.iris import get_iris_pids, get_iris_type_dict, get_iris_pub_years, read_iris
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -146,7 +146,7 @@ def create_iris_in_meta(
     temp_parquet_dir = IRIS_IN_META_DIR / "temp_chunks"
     temp_parquet_dir.mkdir(exist_ok=True)
 
-    iris_pids_lf = get_iris_pids(iris_path).lazy()
+    iris_pids_lf = get_iris_pids(iris_path, include_pub_year=True).lazy()
 
     preference_lf = pl.LazyFrame(
         {
@@ -165,32 +165,37 @@ def create_iris_in_meta(
 
     final_lf = (
         pl.scan_parquet(temp_parquet_dir / "*.parquet")
-        .filter(~pl.col("pub_date").is_null())
-        .with_columns(
-            pl.col("pub_date").str.extract(r"\d{4}", 0).cast(pl.Int32).alias("pub_year")
-        )
-        .filter(pl.col("pub_year") <= 2024)
         .join(preference_lf, on=["type", "iris_type"], how="left")
         .sort("preference", descending=True, nulls_last=True)
         .group_by("id")
         .first()
-        .drop(["preference", "pub_year"])
+        .drop(["preference"])
         .with_columns(pl.col("iris_type").replace_strict(get_iris_type_dict(iris_path)))
         .rename({"type": "meta_type"})
     )
 
     if year_cutoff is not None:
         logging.info(f"Applying year cutoff: citing_year <= {year_cutoff}")
-        final_lf = (
-            final_lf.filter(~pl.col("pub_date").is_null())
-            .with_columns(
-                pl.col("pub_date")
-                .str.extract(r"(\d{4})", 1)
-                .cast(pl.Int32, strict=False)
-                .alias("pub_year")
-            )
-            .filter(pl.col("pub_year") <= year_cutoff)
+        final_lf.join(
+            get_iris_pub_years(iris_path).lazy(),
+            left_on="iris_id",
+            right_on="ITEM_ID",
+            how="left",
         )
+
+        final_lf = final_lf.with_columns(
+            pl.when(pl.col("pub_date").is_null())
+            .then(pl.col("iris_pub_year"))
+            .otherwise(pl.col("pub_date"))
+            .alias("pub_date")
+        ).drop("iris_pub_year")
+
+        final_lf = final_lf.with_columns(
+            pl.col("pub_date")
+            .str.extract(r"(\d{4})", 1)
+            .cast(pl.Int32, strict=False)
+            .alias("pub_year")
+        ).filter(pl.col("pub_year") <= year_cutoff)
 
     output_file = IRIS_IN_META_DIR / "iris_in_meta.parquet"
     final_lf.sink_parquet(output_file)

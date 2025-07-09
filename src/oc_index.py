@@ -115,7 +115,7 @@ def create_iris_in_index(
     tasks = [(archive, TEMP_PARQUET_DIR, omids_list_set) for archive in archives]
 
     with Pool(processes=N_PROCESSES) as pool:
-        results = list(
+        list(
             tqdm(
                 pool.imap_unordered(process_single_zip, tasks),
                 total=len(tasks),
