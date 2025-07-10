@@ -1,18 +1,16 @@
 import argparse
-
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
-
+from src.oc_index import create_iris_in_index
 from src.oc_meta import (
     create_iris_in_meta,
-    search_for_titles,
-    create_iris_not_in_meta,
     create_iris_noid,
+    create_iris_not_in_meta,
+    search_for_titles,
 )
-from src.oc_index import create_iris_in_index
 
 
 def main(args):

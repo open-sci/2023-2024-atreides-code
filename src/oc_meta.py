@@ -15,7 +15,7 @@ from SPARQLWrapper import JSON, SPARQLWrapper
 from SPARQLWrapper.SPARQLExceptions import QueryBadFormed
 from tqdm import tqdm
 
-from src.iris import get_iris_pids, get_iris_type_dict, get_iris_pub_years, read_iris
+from src.iris import IRISDataset
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -44,7 +44,9 @@ def search_for_titles(iris_path):
     load_dotenv()
     OC_APIKEY = os.getenv("OC_APIKEY")
 
-    df = read_iris(iris_path, not_filtered=True)
+    iris = IRISDataset(iris_path)
+
+    df = iris.read(not_filtered=True)
 
     iris_noid_titles = (
         df.select("ITEM_ID", "IDE_DOI", "IDE_ISBN", "IDE_PMID", "TITLE")
@@ -142,11 +144,12 @@ def _process_chunk(
 def create_iris_in_meta(
     archive_path: str, iris_path: Path, year_cutoff: Optional[int] = None
 ) -> None:
+    iris = IRISDataset(iris_path)
     IRIS_IN_META_DIR.mkdir(parents=True, exist_ok=True)
     temp_parquet_dir = IRIS_IN_META_DIR / "temp_chunks"
     temp_parquet_dir.mkdir(exist_ok=True)
 
-    iris_pids_lf = get_iris_pids(iris_path, include_pub_year=True).lazy()
+    iris_pids_lf = iris.get_pids(include_pub_year=True).lazy()
 
     preference_lf = pl.LazyFrame(
         {
@@ -170,14 +173,14 @@ def create_iris_in_meta(
         .group_by("id")
         .first()
         .drop(["preference"])
-        .with_columns(pl.col("iris_type").replace_strict(get_iris_type_dict(iris_path)))
+        .with_columns(pl.col("iris_type").replace_strict(iris.get_type_dict()))
         .rename({"type": "meta_type"})
     )
 
     if year_cutoff is not None:
-        logging.info(f"Applying year cutoff: citing_year <= {year_cutoff}")
+        logging.info("Applying year cutoff: citing_year <= %s", year_cutoff)
         final_lf.join(
-            get_iris_pub_years(iris_path).lazy(),
+            iris.get_pub_years().lazy(),
             left_on="iris_id",
             right_on="ITEM_ID",
             how="left",
@@ -200,7 +203,7 @@ def create_iris_in_meta(
     output_file = IRIS_IN_META_DIR / "iris_in_meta.parquet"
     final_lf.sink_parquet(output_file)
     logging.info("Processing complete")
-    logging.info(f"Iris In Meta saved to '{output_file}'")
+    logging.info("Iris In Meta saved to '%s'", output_file)
     for file in temp_parquet_dir.iterdir():
         file.unlink()
     temp_parquet_dir.rmdir()
@@ -270,20 +273,23 @@ def create_iris_not_in_meta(iris_path: Path):
     output_path = IRIS_NOT_IN_META_DIR / "iris_not_in_meta.parquet"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    iris_pids_lf = get_iris_pids(iris_path).lazy()
+    iris = IRISDataset(iris_path)
+    iris_pids_lf = iris.get_pids(iris_path).lazy()
     iim_lf = pl.scan_parquet(iim_file).select("iris_id")
 
     iris_not_in_meta_df = iris_pids_lf.join(iim_lf, on="iris_id", how="anti").collect()
 
     iris_not_in_meta_df.write_parquet(output_path)
-    logging.info(f"Iris Not In Meta saved to '{output_path}'")
+    logging.info("Iris Not In Meta saved to '%s'", output_path)
 
 
 def create_iris_noid(iris_path: Path):
     output_path = IRIS_NO_ID_DIR / "iris_no_id.parquet"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    iris_noid_df = read_iris(iris_path, no_id=True)
+    iris = IRISDataset(iris_path)
+
+    iris_noid_df = iris.read(no_id=True)
 
     iris_noid_df.write_parquet(output_path)
-    logging.info(f"Iris No ID saved to '{output_path}'")
+    logging.info("Iris No ID saved to '%s'", output_path)
