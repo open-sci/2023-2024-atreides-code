@@ -2,8 +2,6 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
-
 from src.oc_index import create_iris_in_index
 from src.oc_meta import (
     create_iris_in_meta,
@@ -12,27 +10,29 @@ from src.oc_meta import (
     search_for_titles,
 )
 
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
-def main(args):
-    if args.iris_in_meta:
-        create_iris_in_meta(args.meta_path, args.iris_path)
 
-    if args.iris_not_in_meta:
-        create_iris_not_in_meta(args.iris_path)
+def main(parsed_args):
+    if parsed_args.iris_in_meta:
+        create_iris_in_meta(parsed_args.meta_path, parsed_args.iris_path)
 
-    if args.iris_no_id:
-        create_iris_noid(args.iris_path)
+    if parsed_args.iris_not_in_meta:
+        create_iris_not_in_meta(parsed_args.iris_path)
 
-    if args.search_for_titles:
-        search_for_titles(args.iris_path)
+    if parsed_args.iris_no_id:
+        create_iris_noid(parsed_args.iris_path)
 
-    if args.iris_in_index:
-        if args.index_path is None:
+    if parsed_args.search_for_titles:
+        search_for_titles(parsed_args.iris_path)
+
+    if parsed_args.iris_in_index:
+        if parsed_args.index_path is None:
             print(
                 "Please provide the path to the OpenCitations Index dump folder by specifying the -index argument."
             )
-            exit(1)
-        create_iris_in_index(args.index_path, args.year_cutoff)
+            sys.exit(1)
+        create_iris_in_index(parsed_args.index_path, parsed_args.year_cutoff)
 
 
 if __name__ == "__main__":

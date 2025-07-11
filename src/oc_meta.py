@@ -30,7 +30,7 @@ def get_publication_type(doi, apikey):
     HTTP_HEADERS = {"authorization": apikey}
     API_CALL = "https://w3id.org/oc/meta/api/v1/metadata/{}"
 
-    response = get(API_CALL.format("doi:" + doi), headers=HTTP_HEADERS)
+    response = get(API_CALL.format("doi:" + doi), headers=HTTP_HEADERS, timeout=10)
 
     try:
         return response.json()[0]["type"]
@@ -92,8 +92,8 @@ def search_for_titles(iris_path):
                 for result in results["results"]["bindings"]:
                     entity = result["entity"]["value"]
                     doi = result["doi"]["value"]
-                    type = get_publication_type(doi, OC_APIKEY)
-                    if type:
+                    pub_type = get_publication_type(doi, OC_APIKEY)
+                    if pub_type:
                         findings.append(
                             {
                                 "title": title,
@@ -210,21 +210,21 @@ def create_iris_in_meta(
 
 
 def _process_zip_archive(zip_path: str, iris_pids_lf: pl.LazyFrame, temp_dir: Path):
-    archive = ZipFile(zip_path)
-    csv_files = [f for f in archive.namelist() if f.endswith(".csv")]
-    for csv_file in tqdm(csv_files, desc="Processing Meta CSV files"):
-        with archive.open(csv_file, "r") as file:
-            with tempfile.NamedTemporaryFile() as tf:
-                tf.write(file.read())
-                tf.seek(0)
-                os.makedirs(temp_dir, exist_ok=True)
-                df = _process_chunk(tf.name, iris_pids_lf)
+    with ZipFile(zip_path, "r") as archive:
+        csv_files = [f for f in archive.namelist() if f.endswith(".csv")]
+        for csv_file in tqdm(csv_files, desc="Processing Meta CSV files"):
+            with archive.open(csv_file, "r") as file:
+                with tempfile.NamedTemporaryFile() as tf:
+                    tf.write(file.read())
+                    tf.seek(0)
+                    os.makedirs(temp_dir, exist_ok=True)
+                    df = _process_chunk(tf.name, iris_pids_lf)
 
-                if not df.is_empty():
-                    df.write_parquet(
-                        temp_dir
-                        / f"{os.path.basename(csv_file).replace('.csv', '.parquet')}"
-                    )
+                    if not df.is_empty():
+                        df.write_parquet(
+                            temp_dir
+                            / f"{os.path.basename(csv_file).replace('.csv', '.parquet')}"
+                        )
 
 
 def _save_batches(batched_dfs: list[pl.DataFrame], batch_idx: int, temp_dir: Path):
@@ -247,9 +247,7 @@ def _process_tar_archive(
         batched_dfs = []
         batch_idx = 0
 
-        for i, csv_member in enumerate(
-            tqdm(csv_members, desc="Processing Meta CSV files")
-        ):
+        for csv_member in tqdm(csv_members, desc="Processing Meta CSV files"):
             with archive.extractfile(csv_member) as file:
                 df = _process_chunk(file, iris_pids_lf)
                 if df is not None and not df.is_empty():

@@ -1,8 +1,8 @@
 import argparse
-from pathlib import Path
 import os
-
 import textwrap
+from pathlib import Path
+
 import polars as pl
 
 pl.Config.set_tbl_hide_dataframe_shape(True)
@@ -31,25 +31,23 @@ def answer_question_2(iim_path="data/iris_in_meta"):
 
     lf_iim = pl.scan_parquet(iris_in_meta_path / "*.parquet")
 
-    result = (
-        lf_iim.group_by("iris_type")
-        .len()
-        .sort("len", descending=True)
-        .collect(streaming=True)
-    )
+    result = lf_iim.group_by("iris_type").len().sort("len", descending=True).collect()
 
     return result
 
 
 def answer_question_3(iii_path="data/iris_in_index"):
     iii_path = Path(iii_path)
+    index_file = iii_path / "iris_in_index.parquet"
 
     if not iii_path.exists():
         return f"Folder '{str(iii_path)}' does not exist. Please run the 'index_to_parquet.py' script first."
+    if not index_file.exists():
+        return f"File '{str(index_file)}' does not exist. Please run the 'index_to_parquet.py' script first."
 
-    lf_iii = pl.scan_parquet(iii_path / "iris_in_index.parquet")
+    lf_iii = pl.scan_parquet(index_file)
 
-    result = lf_iii.select(pl.len()).collect(streaming=True)
+    result = lf_iii.select(pl.len()).collect()
 
     return result
 
@@ -73,14 +71,14 @@ def answer_question_4(iim_path="data/iris_in_meta", iii_path="data/iris_in_index
         lf_iii.select("citing")
         .filter(~pl.col("citing").is_in(oc_omids_list))
         .select(pl.len())
-        .collect(streaming=True)
+        .collect()
     ).item()
 
     rq4b = (
         lf_iii.select("cited")
         .filter(~pl.col("cited").is_in(oc_omids_list))
         .select(pl.len())
-        .collect(streaming=True)
+        .collect()
     ).item()
 
     pl.Config.set_tbl_hide_column_names(False)
@@ -109,7 +107,7 @@ def answer_question_5(iim_path="data/iris_in_meta", iii_path="data/iris_in_index
     )
 
     pl.Config.set_tbl_hide_column_names(True)
-    result = rq5.select(pl.len()).collect(streaming=True)
+    result = rq5.select(pl.len()).collect()
 
     return result
 

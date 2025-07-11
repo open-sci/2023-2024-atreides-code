@@ -54,7 +54,10 @@ def process_single_zip(args: tuple[Path, Path, Set[str]]) -> tuple[str, int]:
                                 filtered_chunks.append(chunk[mask])
                 except Exception as e:
                     logging.warning(
-                        f"Could not process CSV '{csv_filename}' in '{zip_path.name}': {e}"
+                        "Could not process CSV '%s' in '%s': %s",
+                        csv_filename,
+                        zip_path.name,
+                        e,
                     )
 
         if not filtered_chunks:
@@ -66,11 +69,11 @@ def process_single_zip(args: tuple[Path, Path, Set[str]]) -> tuple[str, int]:
         return (zip_path.name, len(df_combined))
 
     except BadZipFile:
-        logging.error(f"Could not open {zip_path.name}, it may be corrupted.")
+        logging.error("Could not open %s, it may be corrupted.", zip_path.name)
         return (zip_path.name, -1)
     except Exception as e:
         logging.error(
-            f"A critical error occurred while processing {zip_path.name}: {e}"
+            "A critical error occurred while processing %s: %s", zip_path.name, e
         )
         return (zip_path.name, -1)
 
@@ -90,7 +93,7 @@ def create_iris_in_index(
     if index_path.is_file() and index_path.suffix == ".zip":
         index_dir = index_path.with_suffix("")
         if not index_dir.exists():
-            logging.info(f"Unzipping main index dump: {index_path} -> {index_dir}")
+            logging.info("Unzipping main index dump: %s -> %s", index_path, index_dir)
             with ZipFile(index_path, "r") as zip_ref:
                 zip_ref.extractall(index_dir)
     else:
@@ -105,11 +108,13 @@ def create_iris_in_index(
     archives = sorted(list(index_dir.glob("*.zip")))
 
     if not archives:
-        logging.warning(f"No .zip archives found in '{index_dir}'. Aborting.")
+        logging.warning("No .zip archives found in '%s'. Aborting.", index_dir)
         return
 
     logging.info(
-        f"Found {len(archives)} archives. Starting parallel processing with {N_PROCESSES} workers."
+        "Found %d archives. Starting parallel processing with %d workers.",
+        len(archives),
+        N_PROCESSES,
     )
 
     tasks = [(archive, TEMP_PARQUET_DIR, omids_list_set) for archive in archives]
@@ -133,7 +138,7 @@ def create_iris_in_index(
     final_lf = pl.scan_parquet(intermediate_files)
 
     if year_cutoff is not None:
-        logging.info(f"Applying year cutoff: citing_year <= {year_cutoff}")
+        logging.info("Applying year cutoff: citing_year <= %s", year_cutoff)
         final_lf = (
             final_lf.filter(~pl.col("creation").is_null())
             .with_columns(
@@ -148,7 +153,7 @@ def create_iris_in_index(
     final_output_path = IRIS_IN_INDEX_DIR / "iris_in_index.parquet"
     final_lf.sink_parquet(final_output_path)
 
-    logging.info(f"Iris In Index saved to '{final_output_path}'")
+    logging.info("Iris In Index saved to '%s'", final_output_path)
 
     logging.info("Cleaning up temporary directory...")
     shutil.rmtree(TEMP_PARQUET_DIR)

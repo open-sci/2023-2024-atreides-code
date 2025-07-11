@@ -7,16 +7,11 @@ def read_iris_in_meta():
     iim_path = Path("data/iris_in_meta")
     if not iim_path.exists():
         raise FileNotFoundError(
-            f"Folder '{str(iim_path)}' does not exist. Please create the 'iris_in_meta' dataset first"
+            f"Folder '{iim_path}' does not exist. Please create the 'iris_in_meta' dataset first."
         )
-
-    metaparquet_files = Path(iim_path) / "*.parquet"
-    lf_iim = pl.scan_parquet(metaparquet_files)
-
+    lf_iim = pl.scan_parquet(str(iim_path / "*.parquet"))
     return lf_iim
 
 
 def get_omids_list():
-    omids_list = (read_iris_in_meta().select("omid").collect())["omid"].to_list()
-
-    return omids_list
+    return read_iris_in_meta().select("omid").collect().get_column("omid").to_list()
