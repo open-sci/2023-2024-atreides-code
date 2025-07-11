@@ -193,12 +193,16 @@ def create_iris_in_meta(
             .alias("pub_date")
         ).drop("iris_pub_year")
 
-        final_lf = final_lf.with_columns(
-            pl.col("pub_date")
-            .str.extract(r"(\d{4})", 1)
-            .cast(pl.Int32, strict=False)
-            .alias("pub_year")
-        ).filter(pl.col("pub_year") <= year_cutoff)
+        final_lf = (
+            final_lf.with_columns(
+                pl.col("pub_date")
+                .str.extract(r"(\d{4})", 1)
+                .cast(pl.Int32, strict=False)
+                .alias("pub_year")
+            )
+            .filter(pl.col("pub_year") <= year_cutoff)
+            .drop("pub_year")
+        )
 
     output_file = IRIS_IN_META_DIR / "iris_in_meta.parquet"
     final_lf.sink_parquet(output_file)

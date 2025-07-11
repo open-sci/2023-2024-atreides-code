@@ -15,7 +15,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 def main(parsed_args):
     if parsed_args.iris_in_meta:
-        create_iris_in_meta(parsed_args.meta_path, parsed_args.iris_path)
+        create_iris_in_meta(parsed_args.meta_path, parsed_args.iris_path, parsed_args.year_cutoff)
 
     if parsed_args.iris_not_in_meta:
         create_iris_not_in_meta(parsed_args.iris_path)
