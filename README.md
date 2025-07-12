@@ -5,7 +5,6 @@ The repository for the team Atreides of the Open Science course a.a. 2023/2024
 [![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/open-sci/2023-2024-atreides-code/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/open-sci/2023-2024-atreides-code)
 
 ## Usage
-
 ### Installation
 
 ```sh
@@ -15,43 +14,48 @@ git clone https://github.com/open-sci/2023-2024-atreides-code
 # Move to the repository folder
 cd 2023-2024-atreides-code
 
-# Install required dependencies
-pip install -r requirements.txt
+# Install required dependencies using uv
+# uv install options: https://docs.astral.sh/uv/getting-started/installation/
+uv sync
+
+# Activate the virtual environment
+source .venv/bin/activate
 ```
 
 ### Run the software
 
-Create the necessary datasets ('IRIS in Meta' and 'IRIS in Index' are essential to answer the research questions) by running the following command:
+Create the necessary datasets ('IRIS in Meta' and 'IRIS in Index' are required to answer the research questions) by running the following command:
 
 ```sh
-python3 scripts/create_datasets.py -meta <path_to_meta_zip> -iris <path_to_iris_zip> [-index <path_to_index_zip>] <dataset_of_choice>
+python3 -m scripts.create_datasets -meta <path_to_meta_zip> -iris <path_to_iris_zip> [-index <path_to_index_zip>] <dataset_of_choice> [--year_cutoff <year>]
 ```
 
 #### Arguments
 
-- ```-meta, --meta_path```:	Required. The path to the zip file containing the OpenCitations Meta dump.
-- ```-iris, --iris_path```:	Required. The path to the folder containing the IRIS CSV files.
-- ```-index, --index_path```:	The path to the OpenCitations Index dump folder.
-- ```--iris_in_index```:	Create the "Iris In Index" dataset, which contains all the entities with external IDs in IRIS that are in the OpenCitations Index.
-- ```--iris_in_meta```:	Create the "Iris In Meta" dataset, which contains all the entities with external IDs in IRIS that are in Meta.
-- ```--iris_not_in_meta```:	Create the "Iris Not In Meta" dataset, which contains all the entities with external IDs in IRIS that are not in Meta.
-- ```--iris_no_id```:	Create the "Iris No ID" dataset, which contains all the entities with no external IDs in IRIS.
-- ```--search_for_titles```:	Search for the entities without an ID in IRIS by their title in Meta. This can take around 3 hours to complete.
+- `-meta, --meta_path`: Required. The path to the folder (or zip file) containing the OpenCitations Meta dump.
+- `-iris, --iris_path`: Required. The path to the folder (or zip file) containing the IRIS CSV files.
+- `-index, --index_path`: The path to the OpenCitations Index dump folder (or zip).
+- `-iim, --iris_in_meta`: Create the "Iris In Meta" dataset, which contains all the entities with external IDs in IRIS that are in Meta.
+- `-iii, --iris_in_index`: Create the "Iris In Index" dataset, which contains all the entities with external IDs in IRIS that are in the OpenCitations Index.
+- `-inim, --iris_not_in_meta`: Create the "Iris Not In Meta" dataset, which contains all the entities with external IDs in IRIS that are not in Meta.
+- `-inoid, --iris_no_id`: Create the "Iris No ID" dataset, which contains all the entities with no external IDs in IRIS.
+- `-yc, --year-cutoff`: (Optional) Specify a year cutoff for the mapping of IRIS data. Only entities published prior or during this year will be included in the new datasets.
+- `--search_for_titles`: (Experimental) Try to reconcile the IRIS entities without PIDs using their title in OC Meta. <ins>This can take around 3 hours to complete.</ins>
 
-Alternatively, you can download the processed datasets from the links provided below and place them in the 'data/' directory of the repository folder.
-
+Alternatively, you can download the processed datasets from the links provided below and place them in the `data/` directory of the repository folder.
 
 Use the following command to get the answers to the research questions:
 
 ```sh
-python3 scripts/answer_research_questions.py [-rq <research_question_number>]
+python3 -m scripts.answer_research_questions [-rq <research_question_number>]
 ```
 
-You can get the answer to a specific research question by adding to the previous command the ```-rq``` flag followed by the number of the research question you want the answer of. By omitting this flag, you will get the answers to all the research questions.
+- `-rq <research_question_number>`: (Optional) Specify the research question number to answer a specific question.
+
 
 For more detailed guidelines consult the protocol for the software:
 
-[![protocols.io](https://a11ybadges.com/badge?logo=protocolsdotio)](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v5)
+[![protocols.io](https://a11ybadges.com/badge?logo=protocolsdotio)](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5)
 
 
 ## Research questions:
@@ -64,13 +68,11 @@ For more detailed guidelines consult the protocol for the software:
 
 ## Download original datasets
 
-- UNIBO IRIS bibliographic data dump, dated 30 May 2025: [https://doi.org/10.6092/unibo/amsacta/8374](https://doi.org/10.6092/unibo/amsacta/8374)
+- UNIBO IRIS bibliographic data dump, dated 30 May 2025, updated on 3 July 2025: [https://doi.org/10.6092/unibo/amsacta/8427](https://doi.org/10.6092/unibo/amsacta/8427)
 
 - OpenCitations Meta CSV dataset of all bibliographic metadata (February 2025): [https://doi.org/10.6084/m9.figshare.21747461.v11](https://doi.org/10.6084/m9.figshare.21747461.v11)
 
 - OpenCitations Index CSV dataset of all the citation data (March 2025): [https://doi.org/10.6084/m9.figshare.24356626.v4](https://doi.org/10.6084/m9.figshare.24356626.v4)
-
-
 
 ## Output datasets
 
