@@ -70,9 +70,9 @@ For more detailed guidelines consult the protocol for the software:
 
 - UNIBO IRIS bibliographic data dump, dated 30 May 2025, updated on 3 July 2025: [https://doi.org/10.6092/unibo/amsacta/8427](https://doi.org/10.6092/unibo/amsacta/8427)
 
-- OpenCitations Meta CSV dataset of all bibliographic metadata (February 2025): [https://doi.org/10.6084/m9.figshare.21747461.v11](https://doi.org/10.6084/m9.figshare.21747461.v11)
+- OpenCitations Meta CSV dataset of all bibliographic metadata (June 2025): [https://doi.org/10.5281/zenodo.15625651](https://doi.org/10.5281/zenodo.15625651)
 
-- OpenCitations Index CSV dataset of all the citation data (March 2025): [https://doi.org/10.6084/m9.figshare.24356626.v4](https://doi.org/10.6084/m9.figshare.24356626.v4)
+- OpenCitations Index CSV dataset of all the citation data (July 2025): [https://doi.org/10.6084/m9.figshare.24356626.v6](https://doi.org/10.6084/m9.figshare.24356626.v6)
 
 ## Output datasets
 
