@@ -64,9 +64,7 @@ def search_for_titles(iris_path):
 
     findings = []
 
-    for iris_id, title in tqdm(
-        iris_noid_titles.iter_rows(), total=len(iris_noid_titles)
-    ):
+    for iris_id, title in tqdm(iris_noid_titles.iter_rows(), total=len(iris_noid_titles)):
         title = title.replace("\r", " ").replace("\n", "").replace('"', "'")
         if len(title.split()) < 3:
             continue
@@ -97,9 +95,7 @@ def search_for_titles(iris_path):
                         findings.append(
                             {
                                 "title": title,
-                                "omid": entity.replace(
-                                    "https://w3id.org/oc/meta/", "omid:"
-                                ),
+                                "omid": entity.replace("https://w3id.org/oc/meta/", "omid:"),
                                 "id": "doi:" + doi,
                                 "type": type,
                                 "iris_id": iris_id,
@@ -129,9 +125,7 @@ def _process_chunk(
             (pl.col("id").str.extract(r"((?:pmid):[^\s\"]+)")).alias("pmid"),
             (pl.col("id").str.extract(r"((?:isbn):[^\s\"]+)")).alias("isbn"),
         )
-        .with_columns(
-            pl.coalesce([pl.col("doi"), pl.col("pmid"), pl.col("isbn")]).alias("id")
-        )
+        .with_columns(pl.coalesce([pl.col("doi"), pl.col("pmid"), pl.col("isbn")]).alias("id"))
         .drop(["doi", "pmid", "isbn"])
         .drop_nulls("id")
         .join(iris_pids_lf, on="id", how="inner")
@@ -226,8 +220,7 @@ def _process_zip_archive(zip_path: str, iris_pids_lf: pl.LazyFrame, temp_dir: Pa
 
                     if not df.is_empty():
                         df.write_parquet(
-                            temp_dir
-                            / f"{os.path.basename(csv_file).replace('.csv', '.parquet')}"
+                            temp_dir / f"{os.path.basename(csv_file).replace('.csv', '.parquet')}"
                         )
 
 
@@ -243,9 +236,7 @@ def _process_tar_archive(
 ):
     with tarfile.open(tar_path, "r:*") as archive:
         csv_members = (
-            member
-            for member in archive
-            if member.isfile() and member.name.endswith(".csv")
+            member for member in archive if member.isfile() and member.name.endswith(".csv")
         )
 
         batched_dfs = []
@@ -268,9 +259,7 @@ def _process_tar_archive(
 def create_iris_not_in_meta(iris_path: Path):
     iim_file = IRIS_IN_META_DIR / "iris_in_meta.parquet"
     if not iim_file.exists():
-        raise FileNotFoundError(
-            f"'{iim_file}' not found. Please run `process_meta_archive` first."
-        )
+        raise FileNotFoundError(f"'{iim_file}' not found. Please run `process_meta_archive` first.")
 
     output_path = IRIS_NOT_IN_META_DIR / "iris_not_in_meta.parquet"
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -128,11 +128,7 @@ def main():
     if args.research_question:
         result = None
         if args.research_question == 1:
-            print(
-                "{:*^{}}".format(
-                    " Research question n. 1 ", os.get_terminal_size().columns
-                )
-            )
+            print("{:*^{}}".format(" Research question n. 1 ", os.get_terminal_size().columns))
             print(
                 textwrap.fill(
                     "What is the coverage of the publications available in IRIS (strictly concerning research conducted within the University of Bologna) in OpenCitations Meta?",
@@ -143,11 +139,7 @@ def main():
             print(result)
             print("")
         elif args.research_question == 2:
-            print(
-                "{:*^{}}".format(
-                    " Research question n. 2 ", os.get_terminal_size().columns
-                )
-            )
+            print("{:*^{}}".format(" Research question n. 2 ", os.get_terminal_size().columns))
             print(
                 textwrap.fill(
                     "Which are the types of publications that are better covered in OpenCitations Meta?",
@@ -158,11 +150,7 @@ def main():
             print(result)
             print("")
         elif args.research_question == 3:
-            print(
-                "{:*^{}}".format(
-                    " Research question n. 3 ", os.get_terminal_size().columns
-                )
-            )
+            print("{:*^{}}".format(" Research question n. 3 ", os.get_terminal_size().columns))
             print(
                 textwrap.fill(
                     "Research question n. 3: What is the amount of citations (according to OpenCitations Index) included in the IRIS publications that are involved in OpenCitations Meta (as citing entity and as cited entity)?",
@@ -173,11 +161,7 @@ def main():
             print(result)
             print("")
         elif args.research_question == 4:
-            print(
-                "{:*^{}}".format(
-                    " Research question n. 4 ", os.get_terminal_size().columns
-                )
-            )
+            print("{:*^{}}".format(" Research question n. 4 ", os.get_terminal_size().columns))
             print(
                 textwrap.fill(
                     "Research question n. 4: How many of these citations come from and go to publications that are not included in IRIS?",
@@ -188,11 +172,7 @@ def main():
             print(result)
             print("")
         elif args.research_question == 5:
-            print(
-                "{:*^{}}".format(
-                    " Research question n. 5 ", os.get_terminal_size().columns
-                )
-            )
+            print("{:*^{}}".format(" Research question n. 5 ", os.get_terminal_size().columns))
             print(
                 textwrap.fill(
                     "Research question n. 5: How many of these citations involve publications in IRIS as both citing and cited entities?",
@@ -206,9 +186,7 @@ def main():
         term_size = os.get_terminal_size()
 
         print("\n" + "=" * term_size.columns)
-        print(
-            "{:*^{}}".format(" Research question n. 1 ", os.get_terminal_size().columns)
-        )
+        print("{:*^{}}".format(" Research question n. 1 ", os.get_terminal_size().columns))
         print(
             textwrap.fill(
                 "What is the coverage of the publications available in IRIS (strictly concerning research conducted within the University of Bologna) in OpenCitations Meta?",
@@ -218,9 +196,7 @@ def main():
         print("")
         print(answer_question_1())
         print("\n" + "=" * term_size.columns)
-        print(
-            "{:*^{}}".format(" Research question n. 2 ", os.get_terminal_size().columns)
-        )
+        print("{:*^{}}".format(" Research question n. 2 ", os.get_terminal_size().columns))
         print(
             textwrap.fill(
                 "Which are the types of publications that are better covered in OpenCitations Meta?",
@@ -230,9 +206,7 @@ def main():
         print("")
         print(answer_question_2())
         print("\n" + "=" * term_size.columns)
-        print(
-            "{:*^{}}".format(" Research question n. 3 ", os.get_terminal_size().columns)
-        )
+        print("{:*^{}}".format(" Research question n. 3 ", os.get_terminal_size().columns))
         print(
             textwrap.fill(
                 "Research question n. 3: What is the amount of citations (according to OpenCitations Index) included in the IRIS publications that are involved in OpenCitations Meta (as citing entity and as cited entity)?",
@@ -242,9 +216,7 @@ def main():
         print("")
         print(answer_question_3())
         print("\n" + "=" * term_size.columns)
-        print(
-            "{:*^{}}".format(" Research question n. 4 ", os.get_terminal_size().columns)
-        )
+        print("{:*^{}}".format(" Research question n. 4 ", os.get_terminal_size().columns))
         print(
             textwrap.fill(
                 "Research question n. 4: How many of these citations come from and go to publications that are not included in IRIS?",
@@ -254,9 +226,7 @@ def main():
         print("")
         print(answer_question_4())
         print("\n" + "=" * term_size.columns)
-        print(
-            "{:*^{}}".format(" Research question n. 5 ", os.get_terminal_size().columns)
-        )
+        print("{:*^{}}".format(" Research question n. 5 ", os.get_terminal_size().columns))
         print(
             textwrap.fill(
                 "Research question n. 5: How many of these citations involve publications in IRIS as both citing and cited entities?",

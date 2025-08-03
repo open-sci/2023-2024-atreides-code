@@ -47,9 +47,7 @@ def process_single_zip(args: tuple[Path, Path, Set[str]]) -> tuple[str, int]:
                             low_memory=False,
                         )
                         for chunk in reader:
-                            mask = chunk["cited"].isin(omids_set) | chunk[
-                                "citing"
-                            ].isin(omids_set)
+                            mask = chunk["cited"].isin(omids_set) | chunk["citing"].isin(omids_set)
                             if mask.any():
                                 filtered_chunks.append(chunk[mask])
                 except Exception as e:
@@ -72,15 +70,11 @@ def process_single_zip(args: tuple[Path, Path, Set[str]]) -> tuple[str, int]:
         logging.error("Could not open %s, it may be corrupted.", zip_path.name)
         return (zip_path.name, -1)
     except Exception as e:
-        logging.error(
-            "A critical error occurred while processing %s: %s", zip_path.name, e
-        )
+        logging.error("A critical error occurred while processing %s: %s", zip_path.name, e)
         return (zip_path.name, -1)
 
 
-def create_iris_in_index(
-    index_path_str: str, year_cutoff: Optional[int] = None
-) -> None:
+def create_iris_in_index(index_path_str: str, year_cutoff: Optional[int] = None) -> None:
     if not IRIS_IN_META_DIR.exists():
         raise FileNotFoundError(
             f"Folder '{IRIS_IN_META_DIR}' does not exist. Please create the 'iris_in_meta' dataset first."

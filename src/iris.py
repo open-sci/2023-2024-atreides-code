@@ -23,9 +23,7 @@ class IRISDataset:
     def _read_csv_from_zip(self, filepath, columns=None, dtypes=None):
         with ZipFile(self.iris_path) as z:
             with z.open(str(filepath)) as f:
-                return pl.read_csv(
-                    f, columns=columns, dtypes=dtypes, ignore_errors=True
-                )
+                return pl.read_csv(f, columns=columns, dtypes=dtypes, ignore_errors=True)
 
     def _read_csv_from_folder(self, filepath, columns=None, dtypes=None):
         return pl.read_csv(
@@ -86,9 +84,7 @@ class IRISDataset:
                     "REL_ISPARTOFJOURNAL",
                 ],
             }.items():
-                df = df.join(
-                    self._read_csv(name, columns=cols), on="ITEM_ID", how="left"
-                )
+                df = df.join(self._read_csv(name, columns=cols), on="ITEM_ID", how="left")
 
         if no_id:
             df = df.filter(
@@ -107,9 +103,7 @@ class IRISDataset:
 
     def get_metadata_df(self):
         if self._metadata_df is None:
-            self._metadata_df = self.read(metadata=True).drop(
-                "IDE_DOI", "IDE_ISBN", "IDE_PMID"
-            )
+            self._metadata_df = self.read(metadata=True).drop("IDE_DOI", "IDE_ISBN", "IDE_PMID")
         return self._metadata_df
 
     def _apply_heuristic(self, group, priority):
@@ -117,9 +111,9 @@ class IRISDataset:
         group = group.join(
             self.get_metadata_df(), left_on="iris_id", right_on="ITEM_ID", how="inner"
         ).with_columns(
-            pl.fold(
-                acc=pl.lit(0), function=lambda acc, x: acc + x.is_null(), exprs=pl.all()
-            ).alias("null_count")
+            pl.fold(acc=pl.lit(0), function=lambda acc, x: acc + x.is_null(), exprs=pl.all()).alias(
+                "null_count"
+            )
         )
 
         # sort by null_count within same iris_type + id and keep the first
@@ -129,9 +123,7 @@ class IRISDataset:
 
         # sorty by priority the remaining entities with the same id (but different type) and keep first
         group = group.group_by("id").map_groups(
-            lambda g: g.sort(
-                pl.col("iris_type").replace(priority, default=float("inf"))
-            ).head(1)
+            lambda g: g.sort(pl.col("iris_type").replace(priority, default=float("inf"))).head(1)
         )
 
         return group
@@ -157,9 +149,7 @@ class IRISDataset:
             .with_columns(
                 (
                     "doi:"
-                    + pl.col("IDE_DOI")
-                    .str.extract(r"(10\.\d{4,}\/[^,\s;]*)")
-                    .str.to_lowercase()
+                    + pl.col("IDE_DOI").str.extract(r"(10\.\d{4,}\/[^,\s;]*)").str.to_lowercase()
                 ).alias("id")
             )
             .drop_nulls("id")
@@ -175,9 +165,7 @@ class IRISDataset:
             .with_columns(
                 (
                     "pmid:"
-                    + pl.col("IDE_PMID")
-                    .str.extract(r"0*([1-9][0-9]{1,8})", 1)
-                    .str.to_lowercase()
+                    + pl.col("IDE_PMID").str.extract(r"0*([1-9][0-9]{1,8})", 1).str.to_lowercase()
                 ).alias("id")
             )
             .drop_nulls("id")
@@ -209,9 +197,7 @@ class IRISDataset:
     def get_pub_years(self):
         return self.read().select(
             pl.col("ITEM_ID").alias("ITEM_ID"),
-            pl.col("DATE_ISSUED_YEAR")
-            .cast(pl.Int32, strict=False)
-            .alias("iris_pub_year"),
+            pl.col("DATE_ISSUED_YEAR").cast(pl.Int32, strict=False).alias("iris_pub_year"),
         )
 
     def get_pids(self, include_pub_year=False):
@@ -221,9 +207,7 @@ class IRISDataset:
         pmids = self._filter_pmids(df_filtered)
         isbns = self._filter_isbns(df_filtered)
 
-        all_ids = pl.concat([dois, pmids, isbns]).rename(
-            {"OWNING_COLLECTION": "iris_type"}
-        )
+        all_ids = pl.concat([dois, pmids, isbns]).rename({"OWNING_COLLECTION": "iris_type"})
 
         deduped_iris = all_ids.unique("iris_id", keep="first", maintain_order=True)
         duplicated_ids = (
@@ -236,9 +220,7 @@ class IRISDataset:
             duplicated_ids, "doi:", priority={35: 1, 50: 2, 41: 3, 57: 4}
         )
         drop_pmid = self._handle_duplicates(duplicated_ids, "pmid:", priority={35: 1})
-        drop_isbn = self._handle_duplicates(
-            duplicated_ids, "isbn:", priority={50: 1, 49: 2, 35: 3}
-        )
+        drop_isbn = self._handle_duplicates(duplicated_ids, "isbn:", priority={50: 1, 49: 2, 35: 3})
 
         final_df = deduped_iris.join(
             pl.concat([drop_doi, drop_pmid, drop_isbn]), on="iris_id", how="anti"
