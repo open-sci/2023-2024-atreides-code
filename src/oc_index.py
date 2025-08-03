@@ -129,7 +129,7 @@ def create_iris_in_index(index_path_str: str, year_cutoff: Optional[int] = None)
         logging.warning("No matching data found. No final file will be created.")
         return
 
-    final_lf = pl.scan_parquet(intermediate_files)
+    final_lf = pl.scan_parquet(intermediate_files).unique("id", keep="first")
 
     if year_cutoff is not None:
         logging.info("Applying year cutoff: citing_year <= %s", year_cutoff)
@@ -142,7 +142,7 @@ def create_iris_in_index(index_path_str: str, year_cutoff: Optional[int] = None)
                 .alias("citing_year")
             )
             .filter(pl.col("citing_year") <= year_cutoff)
-        )
+        ).drop("citing_year")
 
     final_output_path = IRIS_IN_INDEX_DIR / "iris_in_index.parquet"
     final_lf.sink_parquet(final_output_path)
