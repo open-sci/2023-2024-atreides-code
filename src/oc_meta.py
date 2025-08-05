@@ -163,7 +163,7 @@ def create_iris_in_meta(
     final_lf = (
         pl.scan_parquet(temp_parquet_dir / "*.parquet")
         .join(preference_lf, on=["type", "iris_type"], how="left")
-        .sort("preference", descending=True, nulls_last=True)
+        .sort(["preference", "pub_date"], descending=True, nulls_last=True, maintain_order=True)
         .group_by("id")
         .first()
         .drop(["preference"])

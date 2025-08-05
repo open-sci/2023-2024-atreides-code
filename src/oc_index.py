@@ -122,14 +122,18 @@ def create_iris_in_index(index_path_str: str, year_cutoff: Optional[int] = None)
             )
         )
 
-    logging.info("Finished processing.")
+    logging.info("Finished processing OC Index archives.")
 
     intermediate_files = list(TEMP_PARQUET_DIR.glob("*.parquet"))
     if not intermediate_files:
         logging.warning("No matching data found. No final file will be created.")
         return
 
-    final_lf = pl.scan_parquet(intermediate_files).unique("id", keep="first")
+    final_lf = (
+        pl.scan_parquet(intermediate_files)
+        .sort(["id", "creation"], nulls_last=True)
+        .unique("id", keep="first")
+    )
 
     if year_cutoff is not None:
         logging.info("Applying year cutoff: citing_year <= %s", year_cutoff)
