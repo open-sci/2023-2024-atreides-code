@@ -69,14 +69,14 @@ def answer_question_4(iim_path="data/iris_in_meta", iii_path="data/iris_in_index
 
     rq4a = (
         lf_iii.select("citing")
-        .filter(~pl.col("citing").is_in(oc_omids_list))
+        .filter(pl.col("citing").is_in(oc_omids_list))
         .select(pl.len())
         .collect()
     ).item()
 
     rq4b = (
         lf_iii.select("cited")
-        .filter(~pl.col("cited").is_in(oc_omids_list))
+        .filter(pl.col("cited").is_in(oc_omids_list))
         .select(pl.len())
         .collect()
     ).item()
