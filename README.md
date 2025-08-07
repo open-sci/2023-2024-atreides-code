@@ -55,7 +55,7 @@ python3 -m scripts.answer_research_questions [-rq <research_question_number>]
 
 For more detailed guidelines consult the protocol for the software:
 
-[![protocols.io](https://a11ybadges.com/badge?logo=protocolsdotio)](https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5)
+[![protocols.io](https://a11ybadges.com/badge?logo=protocolsdotio)](https://dx.doi.org/10.17504/protocols.io.g6xmbzfk7)
 
 
 ## Research questions:
@@ -76,10 +76,10 @@ For more detailed guidelines consult the protocol for the software:
 
 ## Output datasets
 
-- IRIS in Meta: [https://doi.org/10.6084/m9.figshare.25879420.v2](https://doi.org/10.6084/m9.figshare.25879420.v2)
+- IRIS in Meta: [https://doi.org/10.6084/m9.figshare.25879420.v3](https://doi.org/10.6084/m9.figshare.25879420.v3)
 
-- IRIS in Index: [https://doi.org/10.6084/m9.figshare.25879441.v2](https://doi.org/10.6084/m9.figshare.25879441.v2)
+- IRIS in Index: [https://doi.org/10.6084/m9.figshare.25879441.v3](https://doi.org/10.6084/m9.figshare.25879441.v3)
 
-- IRIS Not in Meta: [https://doi.org/10.6084/m9.figshare.25897708.v2](https://doi.org/10.6084/m9.figshare.25897708.v2)
+- IRIS Not in Meta: [https://doi.org/10.6084/m9.figshare.25897708.v3](https://doi.org/10.6084/m9.figshare.25897708.v3)
 
-- IRIS No ID: [https://doi.org/10.6084/m9.figshare.25897759.v2](https://doi.org/10.6084/m9.figshare.25897759.v2)
+- IRIS No ID: [https://doi.org/10.6084/m9.figshare.25897759.v3](https://doi.org/10.6084/m9.figshare.25897759.v3)

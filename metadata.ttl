@@ -9,7 +9,7 @@
     dcterms:description "A Python software developed for processing and analyzing the IRIS dataset, matching data with OpenCitations Meta and Index, and generating result datasets."@en ;
     dcterms:type "Software" ;
     dcterms:creator <https://orcid.org/0009-0003-7124-9639> , <https://orcid.org/0009-0007-4127-4875> , <https://orcid.org/0009-0006-0853-1772> ;
-    dcterms:issued "2024-09-15"^^xsd:date ;
+    dcterms:issued "2025-08-07"^^xsd:date ;
     dcterms:license <https://opensource.org/licenses/ISC> ;
     dcterms:subject "Open Science", "OpenCitations", "IRIS", "OpenCitations Meta", "OpenCitations Index", "UNIBO" ;
     dcterms:language "Python" ;
@@ -20,8 +20,8 @@
                      "Requests==2.32.2" ,
                      "SPARQLWrapper==2.0.0" ,
                      "tqdm==4.66.4" ;
-    dcterms:relation <https://dx.doi.org/10.17504/protocols.io.3byl497wjgo5/v4> ;
-    dcat:accessURL <https://doi.org/10.5281/zenodo.11262416> , <https://github.com/open-sci/2023-2024-atreides-code/tree/v3.0.0> .
+    dcterms:relation <https://dx.doi.org/10.17504/protocols.io.g6xmbzfk7> ;
+    dcat:accessURL <https://doi.org/10.5281/zenodo.11262416> , <https://github.com/open-sci/2023-2024-atreides-code/tree/v4.0.0> .
 
 
 # Metadata about each creator
@@ -38,38 +38,38 @@
     foaf:orcid "https://orcid.org/0009-0006-0853-1772" .
 
 # Metadata about the datasets used
-<https://doi.org/10.6092/unibo%2Famsacta%2F7608> a dcat:Distribution ;
-    dcterms:title "IRIS Dump (14 March 2024)" ;
-    dcterms:identifier "https://doi.org/10.6092/unibo%2Famsacta%2F7608" ;
-    dcterms:issued "2024-03-14"^^xsd:date .
+<https://doi.org/10.6092/unibo/amsacta/8427> a dcat:Distribution ;
+    dcterms:title "IRIS Dump (30 May 2025, updated 3 July 2025)" ;
+    dcterms:identifier "https://doi.org/10.6092/unibo/amsacta/8427" ;
+    dcterms:issued "2025-05-30"^^xsd:date .
 
-<https://doi.org/10.6084/m9.figshare.21747461.v8> a dcat:Distribution ;
-    dcterms:title "OpenCitations Meta April 2024 Dump" ;
-    dcterms:identifier "https://doi.org/10.6084/m9.figshare.21747461.v8" ;
-    dcterms:issued "2024-04-01"^^xsd:date .
+<https://doi.org/10.5281/zenodo.15625651> a dcat:Distribution ;
+    dcterms:title "OpenCitations Meta June 2025 Dump" ;
+    dcterms:identifier "https://doi.org/10.5281/zenodo.15625651" ;
+    dcterms:issued "2025-06-01"^^xsd:date .
 
-<https://doi.org/10.6084/m9.figshare.24356626.v2> a dcat:Distribution ;
-    dcterms:title "OpenCitations Index November 2023 Dump" ;
-    dcterms:identifier "https://doi.org/10.6084/m9.figshare.24356626.v2" ;
-    dcterms:issued "2023-11-01"^^xsd:date .
+<https://doi.org/10.6084/m9.figshare.24356626.v6> a dcat:Distribution ;
+    dcterms:title "OpenCitations Index July 2025 Dump" ;
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.24356626.v6" ;
+    dcterms:issued "2025-07-01"^^xsd:date .
 
 # Metadata about the result datasets generated
-<https://doi.org/10.6084/m9.figshare.25879420.v2> a dcat:Distribution ;
+<https://doi.org/10.6084/m9.figshare.25879420.v3> a dcat:Distribution ;
     dcterms:title "IRIS in Meta" ;
-    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25879420.v2" ;
-    dcterms:issued "2024-09-15"^^xsd:date .
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25879420.v3" ;
+    dcterms:issued "2025-08-07"^^xsd:date .
 
-<https://doi.org/10.6084/m9.figshare.25879441.v2> a dcat:Distribution ;
+<https://doi.org/10.6084/m9.figshare.25879441.v3> a dcat:Distribution ;
     dcterms:title "IRIS in Index" ;
-    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25879441.v2" ;
-    dcterms:issued "2024-09-15"^^xsd:date .
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25879441.v3" ;
+    dcterms:issued "2025-08-07"^^xsd:date .
 
-<https://doi.org/10.6084/m9.figshare.25897708.v2> a dcat:Distribution ;
+<https://doi.org/10.6084/m9.figshare.25897708.v3> a dcat:Distribution ;
     dcterms:title "IRIS Not in Meta" ;
-    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25897708.v2" ;
-    dcterms:issued "2024-09-15"^^xsd:date .
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25897708.v3" ;
+    dcterms:issued "2025-08-07"^^xsd:date .
 
-<https://doi.org/10.6084/m9.figshare.25897759.v2> a dcat:Distribution ;
+<https://doi.org/10.6084/m9.figshare.25897759.v3> a dcat:Distribution ;
     dcterms:title "IRIS No ID" ;
-    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25897759.v2" ;
-    dcterms:issued "2024-09-15"^^xsd:date .
+    dcterms:identifier "https://doi.org/10.6084/m9.figshare.25897759.v3" ;
+    dcterms:issued "2025-08-07"^^xsd:date .
